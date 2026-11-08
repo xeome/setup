@@ -40,7 +40,9 @@ and keeps the answer in `~/.local/state/dots/voicenote`. Delete that file to be
 asked again on the next deploy, which runs when `infra/` changes. Until then the
 extension stays linked or unlinked as it was. After a yes,
 `chezmoi apply` links the extension into every Zen profile: enable it once in
-the add-ons prompt, like the hometab.
+the add-ons prompt, like the hometab. Its toolbar button turns transcribing on
+and off, `journalctl -t voicenote` has a line for each note, and deleting
+`~/.cache/voicenote` clears the cached transcripts.
 
 To add a machine, give it a `[machines.<hostname>]` entry in
 `home/.chezmoidata.toml`, then run `python3 -I tools/plymouth.py` and commit

@@ -1,12 +1,49 @@
-// node tools/voicenote.test.mjs — checks home/dot_config/zen/voicenote's hook.js, wav.js and island.js.
+// node tools/voicenote.test.mjs — checks home/dot_config/zen/voicenote's manifest, hook.js, wav.js,
+// background.js and island.js.
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import vm from "node:vm";
 
 const DIR = new URL("../home/dot_config/zen/voicenote/", import.meta.url);
 const read = name => readFileSync(new URL(name, DIR), "utf8");
 const settle = () => new Promise(r => setImmediate(r));
 const noTimer = () => { throw new Error("the island armed a timer"); };
+
+function makeStorage(init = {}) {
+    const data = { ...init }, listeners = [];
+    return {
+        local: {
+            get: async key => (key in data ? { [key]: data[key] } : {}),
+            set: async obj => {
+                const changes = Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, { oldValue: data[k], newValue: v }]));
+                Object.assign(data, obj);
+                await null;
+                for (const fn of listeners) fn(changes, "local");
+            },
+        },
+        onChanged: { addListener: fn => listeners.push(fn) },
+    };
+}
+
+function makeClock() {
+    let now = 0, ids = 0;
+    const timers = new Map();
+    return {
+        setTimeout: (fn, ms = 0) => { timers.set(++ids, { at: now + ms, fn }); return ids; },
+        clearTimeout: id => { timers.delete(id); },
+        advance(ms) {
+            const end = now + ms;
+            for (;;) {
+                const [id, t] = [...timers].filter(([, t]) => t.at <= end).sort((a, b) => a[1].at - b[1].at)[0] ?? [];
+                if (!t) break;
+                timers.delete(id);
+                now = t.at;
+                t.fn();
+            }
+            now = end;
+        },
+    };
+}
 
 {
     const returned = [];
@@ -64,7 +101,40 @@ const noTimer = () => { throw new Error("the island armed a timer"); };
     assert.deepEqual([0, 1, 2, 3, 4, 5].map(i => v.getInt16(44 + i * 2, true)), [0, 32767, -32768, 16383, -16384, 32767]);
 }
 
-function loadIsland() {
+async function loadBackground(storage = makeStorage()) {
+    const badge = {}, sent = [], clicks = [], state = { native: { text: "merhaba" } };
+    let onMessage;
+    const ctx = vm.createContext({
+        browser: {
+            storage,
+            browserAction: {
+                setBadgeText: ({ text }) => { badge.text = text; },
+                setTitle: ({ title }) => { badge.title = title; },
+                onClicked: { addListener: fn => clicks.push(fn) },
+            },
+            runtime: {
+                onMessage: { addListener: fn => { onMessage = fn; } },
+                sendNativeMessage: (app, msg) => { sent.push({ app, msg: { ...msg } }); return Promise.resolve(state.native); },
+            },
+        },
+        OfflineAudioContext: class {
+            decodeAudioData() { return Promise.resolve({ duration: 12.5, length: 4 }); }
+            createBufferSource() { return { connect() {}, start() {} }; }
+            startRendering() { return Promise.resolve({ getChannelData: () => new Float32Array(4) }); }
+        },
+        // Node 22 has no Uint8Array.prototype.toBase64.
+        wav: () => ({ toBase64: () => "V0FWIQ==" }),
+    });
+    vm.runInContext(read("background.js"), ctx);
+    await settle();
+    return {
+        badge, sent, state,
+        click: async () => { clicks.forEach(fn => fn()); await settle(); },
+        message: async () => ({ ...(await onMessage({ blob: { arrayBuffer: async () => new ArrayBuffer(8) } })) }),
+    };
+}
+
+function loadIsland(storage = makeStorage()) {
     const listeners = [];
     const target = name => ({
         addEventListener: (type, fn, opt) => listeners.push({ name, type, fn, capture: opt === true || opt?.capture === true }),
@@ -78,15 +148,16 @@ function loadIsland() {
         find(tag) { return this.tagName === tag ? this : this.children.map(c => c.find(tag)).find(Boolean); }
     }
     const root = new El("html");
+    const clock = makeClock();
     const sends = [];
     const copied = [];
     const window = target("window");
     const ctx = vm.createContext({
         window,
         document: { ...target("document"), documentElement: root, createElement: tag => new El(tag) },
-        browser: { runtime: { sendMessage: msg => new Promise((resolve, reject) => sends.push({ msg, resolve, reject })) } },
+        browser: { storage, runtime: { sendMessage: msg => new Promise((resolve, reject) => sends.push({ msg, resolve, reject })) } },
         navigator: { clipboard: { writeText: t => { copied.push(t); return Promise.resolve(); } } },
-        setTimeout: noTimer, setInterval: noTimer, requestAnimationFrame: noTimer,
+        setTimeout: clock.setTimeout, clearTimeout: clock.clearTimeout, setInterval: noTimer, requestAnimationFrame: noTimer,
     });
     vm.runInContext(read("island.js"), ctx);
 
@@ -105,17 +176,21 @@ function loadIsland() {
         const el = island();
         return el && !el.hidden ? { state: el.dataset.state, text: el.find("VOICENOTE-TEXT").textContent } : null;
     };
-    return { listeners, sends, copied, play, esc, fire, island, view, root };
+    const buttons = () => island().children.filter(c => c.tagName === "BUTTON");
+    const elements = (e = root) => [e, ...e.children.flatMap(c => elements(c))];
+    return { listeners, sends, copied, play, esc, fire, island, view, root, clock, buttons, elements };
 }
 
 {
     const t = loadIsland();
+    await settle();
     assert.equal(t.view(), null, "the island shows while idle");
-    for (const type of ["keydown", "pointerdown"]) {
-        const l = t.listeners.find(l => l.type === type);
-        assert.ok(l && l.name === "window" && l.capture, `${type} is not caught on window in the capture phase`);
-    }
+    // Hover holds nothing, and nothing outside the island closes it.
+    assert.deepEqual(t.listeners.map(l => `${l.name} ${l.type} capture=${l.capture}`).sort(),
+        ["window keydown capture=true", "window message capture=false"]);
     t.play("blob:a");
+    assert.deepEqual(t.elements().filter(e => Object.keys(e.handlers).length).map(e => `${e.tagName} ${Object.keys(e.handlers)}`),
+        ["BUTTON click", "BUTTON click"], "an element handles more than a click on Copy and ×");
     assert.equal(t.sends.length, 1);
     assert.deepEqual(t.sends[0].msg.blob, { blobOf: "blob:a" }, "the blob was not sent to the background");
     assert.deepEqual(t.view(), { state: "pending", text: "transcribing" });
@@ -123,7 +198,7 @@ function loadIsland() {
     await settle();
     assert.deepEqual(t.view(), { state: "text", text: "Merhaba, yarın görüşürüz." });
 
-    const copy = t.island().find("BUTTON");
+    const [copy, close] = t.buttons();
     copy.handlers.click.forEach(fn => fn({ stopPropagation() {} }));
     assert.deepEqual(t.copied, ["Merhaba, yarın görüşürüz."]);
 
@@ -131,6 +206,9 @@ function loadIsland() {
     t.play("blob:a");
     assert.equal(t.sends.length, 1, "a replayed src was sent again");
     assert.deepEqual(t.view(), { state: "text", text: "Merhaba, yarın görüşürüz." });
+
+    close.handlers.click.forEach(fn => fn({ stopPropagation() {} }));
+    assert.equal(t.view(), null, "× left the island open");
 }
 
 {
@@ -182,14 +260,136 @@ function loadIsland() {
     const t = loadIsland();
     assert.equal(t.esc(), false, "Esc was stopped while the island was hidden");
     t.play("blob:a");
-    t.fire("pointerdown", { target: t.island().find("VOICENOTE-TEXT") });
-    assert.notEqual(t.view(), null, "a click inside dismissed the island");
-    t.fire("pointerdown", { target: t.root });
-    assert.equal(t.view(), null, "a click outside left the island open");
-    assert.equal(t.esc(), false, "Esc was stopped after a click outside hid the island");
-    t.play("blob:b");
+    for (const type of ["pointerdown", "mousedown", "click"]) t.fire(type, { target: t.root });
+    assert.notEqual(t.view(), null, "a click outside closed the island");
     assert.equal(t.esc(), true, "Esc was let through while the island showed");
     assert.equal(t.view(), null);
+}
+
+for (const [reply, view] of [
+    [{ text: "uzun", seconds: 12 }, { state: "text", text: "uzun" }],
+    [{ error: "no speech heard", seconds: 12 }, { state: "error", text: "no speech heard" }],
+]) {
+    const t = loadIsland();
+    t.play("blob:a");
+    t.clock.advance(60000);
+    assert.deepEqual(t.view(), { state: "pending", text: "transcribing" }, "the pending pill closed on a timer");
+    t.sends[0].resolve(reply);
+    await settle();
+    t.clock.advance(11999);
+    assert.deepEqual(t.view(), view, `${JSON.stringify(reply)} closed before 12 s`);
+    t.clock.advance(1);
+    assert.equal(t.view(), null, `${JSON.stringify(reply)} stayed open at 12 s`);
+}
+
+for (const reply of [{ text: "kısa", seconds: 2 }, { text: "kısa" }]) {
+    const t = loadIsland();
+    t.play("blob:a");
+    t.sends[0].resolve(reply);
+    await settle();
+    t.clock.advance(4999);
+    assert.notEqual(t.view(), null, `${JSON.stringify(reply)} closed before 5 s`);
+    t.clock.advance(1);
+    assert.equal(t.view(), null, `${JSON.stringify(reply)} stayed open at 5 s`);
+}
+
+{
+    const t = loadIsland();
+    t.play("blob:a");
+    t.sends[0].resolve({ text: "uzun", seconds: 12 });
+    await settle();
+    t.play("blob:b");
+    t.clock.advance(13000);
+    assert.deepEqual(t.view(), { state: "pending", text: "transcribing" }, "a result's timer closed the next note's pending pill");
+
+    t.sends[1].resolve({ text: "ikinci", seconds: 12 });
+    await settle();
+    t.clock.advance(6000);
+    assert.equal(t.esc(), true);
+    t.play("blob:b");
+    t.clock.advance(11999);
+    assert.deepEqual(t.view(), { state: "text", text: "ikinci" }, "a replay from the Map closed before its 12 s");
+    t.clock.advance(1);
+    assert.equal(t.view(), null, "a replay from the Map did not arm its own 12 s");
+}
+
+{
+    const t = loadIsland();
+    t.play("blob:long");
+    t.sends[0].resolve({ text: "otuz", seconds: 30 });
+    await settle();
+    t.esc();
+    t.play("blob:short");
+    t.sends[1].resolve({ text: "beş", seconds: 5 });
+    await settle();
+    t.play("blob:long");
+    t.clock.advance(5000);
+    assert.deepEqual(t.view(), { state: "text", text: "otuz" }, "a 5 s note's timer closed a 30 s replay");
+    t.clock.advance(25000);
+    assert.equal(t.view(), null);
+}
+
+{
+    const storage = makeStorage();
+    const bg = await loadBackground(storage);
+    const t = loadIsland(storage);
+    await settle();
+    assert.deepEqual(bg.badge, { text: "", title: "voicenote: on" }, "the button is not on at a first start");
+    await bg.click();
+    assert.deepEqual(bg.badge, { text: "off", title: "voicenote: off" }, "one click did not turn it off");
+    t.play("blob:a");
+    assert.equal(t.sends.length, 0, "a play while off was sent");
+    assert.equal(t.view(), null, "a play while off showed the island");
+    await bg.click();
+    assert.deepEqual(bg.badge, { text: "", title: "voicenote: on" }, "a second click did not turn it back on");
+    t.play("blob:b");
+    assert.equal(t.sends.length, 1, "a play after turning it back on was not sent once");
+    assert.deepEqual(t.sends[0].msg.blob, { blobOf: "blob:b" });
+}
+
+{
+    const storage = makeStorage({ off: true });
+    const bg = await loadBackground(storage);
+    const t = loadIsland(storage);
+    await settle();
+    assert.deepEqual(bg.badge, { text: "off", title: "voicenote: off" }, "a start with off stored shows on");
+    t.play("blob:a");
+    assert.equal(t.sends.length, 0, "an island started off sent a play");
+    assert.equal(t.view(), null, "an island started off showed a play");
+}
+
+{
+    const storage = makeStorage();
+    const t = loadIsland(storage);
+    await settle();
+    t.play("blob:a");
+    await storage.local.set({ off: true });
+    await settle();
+    t.play("blob:b");
+    t.sends[0].resolve({ text: "ilk", seconds: 3 });
+    await settle();
+    assert.deepEqual(t.view(), { state: "text", text: "ilk" }, "the result in flight when turned off did not show");
+    assert.equal(t.sends.length, 1, "a play while off was sent when the request in flight ended");
+
+    t.esc();
+    t.play("blob:a");
+    assert.equal(t.view(), null, "a play while off of a src in the Map showed");
+}
+
+{
+    const bg = await loadBackground();
+    for (const native of [{ text: "merhaba" }, { error: "no speech heard" }]) {
+        bg.state.native = native;
+        assert.deepEqual(await bg.message(), { ...native, seconds: 12.5 }, `the background replied other than ${JSON.stringify(native)} plus seconds`);
+    }
+    assert.deepEqual(bg.sent.at(-1), { app: "xeome.voicenote", msg: { wav: "V0FWIQ==" } }, "the WAV did not reach the native host");
+}
+
+{
+    const manifest = JSON.parse(read("manifest.json"));
+    assert.ok(manifest.permissions.includes("storage"), "the manifest asks for no storage permission");
+    assert.equal(manifest.browser_action?.default_area, "navbar", "the button would land in the extensions panel");
+    assert.ok(existsSync(new URL(manifest.browser_action.default_icon, DIR)), "the button's icon is missing");
 }
 
 {
@@ -200,9 +400,7 @@ function loadIsland() {
     assert.equal(t.view(), null);
 }
 
-for (const name of ["island.js", "hook.js"]) {
-    assert.doesNotMatch(read(name), /setTimeout|setInterval|requestAnimationFrame/, `${name} arms a timer`);
-}
+assert.doesNotMatch(read("hook.js"), /setTimeout|setInterval|requestAnimationFrame/, "hook.js arms a timer");
 assert.doesNotMatch(read("island.js"), /customElements\.define\(/, "customElements is null in Firefox content scripts");
 
 console.log("voicenote OK");

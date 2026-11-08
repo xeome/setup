@@ -4,7 +4,12 @@
   "description": "Shows a local whisper transcript of a WhatsApp Web voice note while it plays.",
   "version": "1",
   "browser_specific_settings": { "gecko": { "id": "voicenote@xeome" } },
-  "permissions": ["nativeMessaging"],
+  "permissions": ["nativeMessaging", "storage"],
+  "browser_action": {
+    "default_icon": "icon.svg",
+    "default_title": "voicenote: on",
+    "default_area": "navbar"
+  },
   "background": { "scripts": ["wav.js", "background.js"] },
   "content_scripts": [
     {
