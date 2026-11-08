@@ -198,6 +198,11 @@ if complete:
             *(f"--{t}: light-dark({L[t]}, {D[t]})" for t in ("ground", "panel", "text", "bright", "dim", "warm")),
             *(f"--{t}: light-dark({rgba(light[t])}, {rgba(dark[t])})" for t in ("line", "ring", "glow", "hover")),
         ),
+        # Dark only: the island is black on either WhatsApp theme.
+        "dot_config/zen/voicenote/island.css": (
+            *(f"--{t}: {D[t]}" for t in ("text", "dim", "warm")),
+            *(f"--{t}: {rgba(dark[t])}" for t in ("line", "ring", "lift", "hover")),
+        ),
         "dot_config/private_vesktop/exact_themes/graphite.theme.css.tmpl": (
             f"--background-base-lowest: {D['ground']};",
             f"--background-base-lower: {D['panel']};",

@@ -62,4 +62,28 @@ with tempfile.TemporaryDirectory() as tmp:
     changed = [str(p.relative_to(zen)) for p in first.keys() | second.keys() if first.get(p) != second.get(p)]
     assert not changed, f"the second run changed {changed}"
 
+    voicenote = str(home / ".config/zen/voicenote")
+    answer = home / ".local/state/dots/voicenote"
+    proxies = [p / "extensions/voicenote@xeome" for p in (linked, hand)]
+    assert not any(v.exists() for v in proxies), "voicenote linked with no answer file"
+
+    answer.parent.mkdir(parents=True)
+    answer.write_text("yes")
+    run(home)
+    first = snapshot(zen)
+    run(home)
+    assert snapshot(zen) == first, "a second run after yes changed files"
+    for v in proxies:
+        assert v.is_file() and v.read_text().strip() == voicenote, f"{v}: {v.read_text() if v.exists() else 'missing'!r}"
+
+    answer.unlink()
+    run(home)
+    assert all(v.is_file() for v in proxies), "voicenote unlinked when the answer file was deleted"
+
+    answer.write_text("no")
+    run(home)
+    assert not any(v.exists() for v in proxies), "voicenote still linked after a later no"
+    for p in (linked, hand):
+        assert (p / "extensions/hometab@xeome").read_text().strip() == hometab, f"{p.name}: no stopped hometab"
+
 print("zen-link OK")

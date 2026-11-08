@@ -26,6 +26,7 @@ from pyinfra.facts.server import Command, OsRelease
 from pyinfra.operations import files, pacman, server, systemd
 from pyinfra.operations.util import any_changed
 
+from askonce import ask_once
 from cmdline import merge, owned
 
 # Keyed by OsRelease id or id_like, so another family is one more entry here.
@@ -85,6 +86,12 @@ assert isinstance(hostname, str) and hostname, hostname
 # on a laptop its hashing costs battery for a few GiB.
 root_fs, _, root_uuid = host.get_fact(Command, "findmnt -rno FSTYPE,UUID /").partition(" ")
 bees = chassis == "desktop" and root_fs == "btrfs"
+# Asked once per machine, before any op runs, because the model is 574 MB.
+# The answer file also tells run_after_link-zen-chrome.sh whether to link the
+# extension. Delete it to be asked again on the next deploy. Until then the
+# extension stays linked or unlinked as it was.
+voicenote = ask_once("~/.local/state/dots/voicenote",
+                     "Install whisper and its 574 MB model for Zen's voicenote extension?") == "yes"
 
 os_release = host.get_fact(OsRelease)
 families = [os_release["id"], *os_release.get("id_like", "").split()]
@@ -100,6 +107,23 @@ def put(src, dest, mode="644"):
 
 repo = family["repo"]
 repo["op"](name="Packages", packages=repo["common"] + repo[wm])
+
+
+# No: the model goes, the packages stay (see PACKAGES on removed names).
+WHISPER_MODEL = "/usr/local/share/whisper/ggml-large-v3-turbo-q5_0.bin"
+if voicenote:
+    repo["op"](name="Voicenote packages", packages=["whisper-cpp", "ggml-vulkan"])
+    # download makes no parent directory.
+    files.directory(name="/usr/local/share/whisper", path="/usr/local/share/whisper",
+                    user="root", group="root", mode="755")
+    files.download(
+        name="Whisper model", dest=WHISPER_MODEL,
+        src="https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3-turbo-q5_0.bin",
+        sha256sum="394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2",  # 574041195 bytes
+        user="root", group="root", mode="644",
+    )
+else:
+    files.file(name="No whisper model", path=WHISPER_MODEL, present=False)
 
 
 put("desktop/50-dots-qt.conf", "/etc/environment.d/50-dots-qt.conf")

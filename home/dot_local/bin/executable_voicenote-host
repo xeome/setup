@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Native messaging host for Zen's voicenote extension.
+
+Reads one message, {"wav": <base64 16 kHz mono WAV>}, and replies {"text"} or
+{"error"} with whisper-cli's stderr tail. Each message is a 4-byte length in
+native byte order, then that much JSON. The WAV goes to whisper-cli on stdin:
+whisper-cli decodes stdin with miniaudio only, so no temp file and no format
+check. ~/.mozilla/native-messaging-hosts/xeome.voicenote.json points Zen here.
+tools/voicenote-host.test.py checks it.
+"""
+import base64
+import json
+import struct
+import subprocess
+import sys
+
+MODEL = "/usr/local/share/whisper/ggml-large-v3-turbo-q5_0.bin"
+
+# A message cut short fails in unpack or json.loads, before whisper-cli runs.
+(length,) = struct.unpack("=I", sys.stdin.buffer.read(4))
+wav = base64.b64decode(json.loads(sys.stdin.buffer.read(length))["wav"], validate=True)
+
+try:
+    run = subprocess.run(["whisper-cli", "-m", MODEL, "-l", "tr", "-nt", "-np", "-f", "-"],
+                         input=wav, capture_output=True)
+    # island.js reads an empty error as a transcript, so every error says something.
+    if run.returncode:
+        reply = {"error": run.stderr.decode(errors="replace").strip()[-500:] or f"whisper-cli exited {run.returncode}"}
+    else:
+        # One line per segment, each with a leading space.
+        reply = {"text": " ".join(l.strip() for l in run.stdout.decode(errors="replace").splitlines() if l.strip())}
+except FileNotFoundError:
+    reply = {"error": "whisper-cli is not installed"}
+
+data = json.dumps(reply).encode()
+sys.stdout.buffer.write(struct.pack("=I", len(data)) + data)
+sys.stdout.buffer.flush()

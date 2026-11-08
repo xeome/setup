@@ -33,6 +33,15 @@ extension that `chezmoi apply` points every Zen profile at. Zen installs it
 disabled: enable it once in the add-ons prompt, and disable any other new-tab
 extension.
 
+`home/dot_config/zen/voicenote` shows a local transcript of a Turkish
+WhatsApp Web voice note while it plays, in a black island at the top of the
+tab. The first deploy asks whether to install whisper-cpp and its 574 MB model,
+and keeps the answer in `~/.local/state/dots/voicenote`. Delete that file to be
+asked again on the next deploy, which runs when `infra/` changes. Until then the
+extension stays linked or unlinked as it was. After a yes,
+`chezmoi apply` links the extension into every Zen profile: enable it once in
+the add-ons prompt, like the hometab.
+
 To add a machine, give it a `[machines.<hostname>]` entry in
 `home/.chezmoidata.toml`, then run `python3 -I tools/plymouth.py` and commit
 its splash.
