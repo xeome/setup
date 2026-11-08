@@ -109,8 +109,9 @@ repo = family["repo"]
 repo["op"](name="Packages", packages=repo["common"] + repo[wm])
 
 
-# No: the model goes, the packages stay (see PACKAGES on removed names).
+# No: the models go, the packages stay (see PACKAGES on removed names).
 WHISPER_MODEL = "/usr/local/share/whisper/ggml-large-v3-turbo-q5_0.bin"
+VAD_MODEL = "/usr/local/share/whisper/ggml-silero-v6.2.0.bin"
 if voicenote:
     repo["op"](name="Voicenote packages", packages=["whisper-cpp", "ggml-vulkan"])
     # download makes no parent directory.
@@ -122,8 +123,15 @@ if voicenote:
         sha256sum="394221709cd5ad1f40c46e6031ca61bce88931e6e088c188294c6d5a55ffa7e2",  # 574041195 bytes
         user="root", group="root", mode="644",
     )
+    files.download(
+        name="Whisper VAD model", dest=VAD_MODEL,
+        src="https://huggingface.co/ggml-org/whisper-vad/resolve/main/ggml-silero-v6.2.0.bin",
+        sha256sum="2aa269b785eeb53a82983a20501ddf7c1d9c48e33ab63a41391ac6c9f7fb6987",  # 885098 bytes
+        user="root", group="root", mode="644",
+    )
 else:
     files.file(name="No whisper model", path=WHISPER_MODEL, present=False)
+    files.file(name="No whisper VAD model", path=VAD_MODEL, present=False)
 
 
 put("desktop/50-dots-qt.conf", "/etc/environment.d/50-dots-qt.conf")

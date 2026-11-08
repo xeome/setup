@@ -2,38 +2,69 @@
 """Native messaging host for Zen's voicenote extension.
 
 Reads one message, {"wav": <base64 16 kHz mono WAV>}, and replies {"text"} or
-{"error"} with whisper-cli's stderr tail. Each message is a 4-byte length in
-native byte order, then that much JSON. The WAV goes to whisper-cli on stdin:
-whisper-cli decodes stdin with miniaudio only, so no temp file and no format
-check. ~/.mozilla/native-messaging-hosts/xeome.voicenote.json points Zen here.
+{"error"}. Each message is a 4-byte length in native byte order, then that much
+JSON. The WAV goes to whisper-cli on stdin: whisper-cli decodes stdin with
+miniaudio only, so no temp file and no format check.
+~/.mozilla/native-messaging-hosts/xeome.voicenote.json points Zen here.
 tools/voicenote-host.test.py checks it.
 """
 import base64
+import hashlib
 import json
+import os
+import pathlib
 import struct
 import subprocess
 import sys
+import syslog
+import tempfile
+import time
 
 MODEL = "/usr/local/share/whisper/ggml-large-v3-turbo-q5_0.bin"
+VAD = "/usr/local/share/whisper/ggml-silero-v6.2.0.bin"
 
 # A message cut short fails in unpack or json.loads, before whisper-cli runs.
 (length,) = struct.unpack("=I", sys.stdin.buffer.read(4))
 wav = base64.b64decode(json.loads(sys.stdin.buffer.read(length))["wav"], validate=True)
 
-try:
-    # With -f -, whisper-cli prints no segments; stdout carries only the -o* formats asked for.
-    run = subprocess.run(["whisper-cli", "-m", MODEL, "-l", "tr", "-nt", "-np", "-otxt", "-f", "-"],
-                         input=wav, capture_output=True)
-    # island.js reads an empty error as a transcript, so every error says something.
-    text = " ".join(run.stdout.decode(errors="replace").split())
-    if run.returncode:
-        reply = {"error": run.stderr.decode(errors="replace").strip()[-500:] or f"whisper-cli exited {run.returncode}"}
-    elif not text:
-        reply = {"error": run.stderr.decode(errors="replace").strip()[-500:] or "whisper-cli printed no transcript"}
+syslog.openlog("voicenote")
+note = f"{(len(wav) - 44) / 32000:.1f}s"
+cache = pathlib.Path.home() / ".cache/voicenote" / f"{hashlib.sha256(wav).hexdigest()}.txt"
+
+if cache.exists():
+    text = cache.read_text(encoding="utf-8")
+    reply, log = {"text": text}, f"cache=hit chars={len(text)}"
+else:
+    start = time.monotonic()
+    try:
+        # With -f -, whisper-cli prints no segments; stdout carries only the -o* formats asked for.
+        run = subprocess.run(["whisper-cli", "-m", MODEL, "--vad", "-vm", VAD, "-l", "tr", "-nt", "-np", "-otxt",
+                              "-f", "-"],
+                             input=wav, capture_output=True)
+    except FileNotFoundError:
+        reply, log = {"error": "whisper-cli is not installed"}, "cache=miss error=whisper-cli is not installed"
     else:
-        reply = {"text": text}
-except FileNotFoundError:
-    reply = {"error": "whisper-cli is not installed"}
+        text = " ".join(run.stdout.decode(errors="replace").split())
+        stderr = run.stderr.decode(errors="replace").strip()[-500:]
+        log = f"cache=miss whisper={time.monotonic() - start:.1f}s exit={run.returncode} chars={len(text)}"
+        if run.returncode or not text:
+            log += f" stderr={' '.join(stderr.split())}"
+        # island.js reads an empty error as a transcript, so every error says something.
+        if run.returncode:
+            reply = {"error": stderr or f"whisper-cli exited {run.returncode}"}
+        elif not text:
+            reply = {"error": "no speech heard"}
+        else:
+            reply = {"text": text}
+            # Best-effort: a full disk or read-only cache must not lose the reply.
+            try:
+                cache.parent.mkdir(parents=True, exist_ok=True)
+                with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=cache.parent, delete=False) as f:
+                    f.write(text)
+                os.replace(f.name, cache)
+            except OSError as e:
+                log += f" cache_error={e.strerror or type(e).__name__}"
+syslog.syslog(f"{note} {log}")
 
 data = json.dumps(reply).encode()
 sys.stdout.buffer.write(struct.pack("=I", len(data)) + data)

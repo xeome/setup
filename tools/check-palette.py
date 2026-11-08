@@ -203,6 +203,7 @@ if complete:
             *(f"--{t}: {D[t]}" for t in ("text", "dim", "warm")),
             *(f"--{t}: {rgba(dark[t])}" for t in ("line", "ring", "lift", "hover")),
         ),
+        "dot_config/zen/voicenote/icon.svg": (f'stroke="{D["dim"]}"',),
         "dot_config/private_vesktop/exact_themes/graphite.theme.css.tmpl": (
             f"--background-base-lowest: {D['ground']};",
             f"--background-base-lower: {D['panel']};",
