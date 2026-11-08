@@ -21,14 +21,17 @@ MODEL = "/usr/local/share/whisper/ggml-large-v3-turbo-q5_0.bin"
 wav = base64.b64decode(json.loads(sys.stdin.buffer.read(length))["wav"], validate=True)
 
 try:
-    run = subprocess.run(["whisper-cli", "-m", MODEL, "-l", "tr", "-nt", "-np", "-f", "-"],
+    # With -f -, whisper-cli prints no segments; stdout carries only the -o* formats asked for.
+    run = subprocess.run(["whisper-cli", "-m", MODEL, "-l", "tr", "-nt", "-np", "-otxt", "-f", "-"],
                          input=wav, capture_output=True)
     # island.js reads an empty error as a transcript, so every error says something.
+    text = " ".join(run.stdout.decode(errors="replace").split())
     if run.returncode:
         reply = {"error": run.stderr.decode(errors="replace").strip()[-500:] or f"whisper-cli exited {run.returncode}"}
+    elif not text:
+        reply = {"error": run.stderr.decode(errors="replace").strip()[-500:] or "whisper-cli printed no transcript"}
     else:
-        # One line per segment, each with a leading space.
-        reply = {"text": " ".join(l.strip() for l in run.stdout.decode(errors="replace").splitlines() if l.strip())}
+        reply = {"text": text}
 except FileNotFoundError:
     reply = {"error": "whisper-cli is not installed"}
 

@@ -17,7 +17,8 @@ HOST = ROOT / "home/dot_local/bin/executable_voicenote-host"
 MODEL = re.search(r'^WHISPER_MODEL = "([^"]+)"', (ROOT / "infra/deploy.py").read_text(), re.M)[1]
 host_model = re.search(r'^MODEL = "([^"]+)"', HOST.read_text(), re.M)[1]
 assert host_model == MODEL, f"the host loads {host_model}, deploy.py downloads {MODEL}"
-# Prints segments the way whisper-cli -nt does.
+# Like whisper-cli 1.9.5 with -f -: stdout carries only the -o* formats asked for, so without
+# -otxt it prints nothing and exits 0. -otxt -nt writes one line per segment, no leading space.
 STUB = """#!/usr/bin/env python3
 import json, os, sys
 d = os.environ["STUB_DIR"]
@@ -25,10 +26,14 @@ open(os.path.join(d, "argv.json"), "w").write(json.dumps(sys.argv[1:]))
 open(os.path.join(d, "stdin"), "wb").write(sys.stdin.buffer.read())
 if os.environ.get("STUB_FAIL") == "quiet":
     sys.exit(3)
+if os.environ.get("STUB_FAIL") == "silent":
+    sys.stderr.write("'--output-file -' used without any other '--output-*'\\n")
+    sys.exit(0)
 if os.environ.get("STUB_FAIL"):
     sys.stderr.write("whisper_init: loading model\\nerror: failed to read audio data\\n")
     sys.exit(2)
-sys.stdout.write(" Merhaba, nasılsın?\\n Yarın görüşürüz.\\n")
+if "-otxt" in sys.argv:
+    sys.stdout.write("Merhaba, nasılsın?\\nYarın görüşürüz.\\n")
 """
 WAV = b"RIFF" + bytes(range(256)) * 40
 
@@ -66,8 +71,13 @@ for flag in (["-l", "tr"], ["-m", MODEL], ["-f", "-"]):
     i = argv.index(flag[0]) if flag[0] in argv else -1
     assert argv[i : i + 2] == flag, f"whisper-cli run without {' '.join(flag)}: {argv}"
 assert "-nt" in argv, f"whisper-cli run without -nt: {argv}"
+assert "-otxt" in argv, f"whisper-cli run without -otxt: {argv}"
 assert sent == WAV, "whisper-cli's stdin is not the sent WAV"
 assert reply(p) == {"text": "Merhaba, nasılsın? Yarın görüşürüz."}, reply(p)
+
+p, _, _ = run(frame({"wav": base64.b64encode(WAV).decode()}), fail="silent")
+r = reply(p)
+assert set(r) == {"error"} and "used without any other" in r["error"], f"an empty transcript replied {r}"
 
 p, _, _ = run(frame({"wav": base64.b64encode(WAV).decode()}), fail="loud")
 r = reply(p)
