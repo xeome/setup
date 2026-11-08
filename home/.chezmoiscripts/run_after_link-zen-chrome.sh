@@ -7,7 +7,10 @@ set -euo pipefail
 
 ZEN="$HOME/.zen"
 HOMETAB="$HOME/.config/zen/hometab"
+VOICENOTE="$HOME/.config/zen/voicenote"
 [[ -f "$ZEN/profiles.ini" ]] || exit 0
+# infra/deploy.py asks once per machine whether to install whisper for voicenote.
+voicenote=$(cat "$HOME/.local/state/dots/voicenote" 2>/dev/null || true)
 
 # userChrome.css is off by default since Zen 1.x. The hometab is unsigned;
 # Zen's build lets the pref turn the check off (MOZ_REQUIRE_SIGNING is false).
@@ -19,6 +22,12 @@ PREFS=(
     'user_pref("zen.urlbar.replace-newtab", false);'
     'user_pref("zen.view.window.scheme", 2);'
 )
+
+proxy() {
+    [[ "$(cat "$1" 2>/dev/null)" == "$2" ]] && return
+    mkdir -p "$(dirname "$1")"
+    echo "$2" > "$1"
+}
 
 sed -n 's/^Path=//p' "$ZEN/profiles.ini" | while IFS= read -r path; do
     # Relative paths are the default; an absolute one (IsRelative=0) is kept.
@@ -36,11 +45,13 @@ sed -n 's/^Path=//p' "$ZEN/profiles.ini" | while IFS= read -r path; do
 
     # A proxy file: Firefox loads the extension unpacked from the folder it
     # names. Zen installs it disabled and asks once.
-    proxy="$profile/extensions/hometab@xeome"
-    if [[ "$(cat "$proxy" 2>/dev/null)" != "$HOMETAB" ]]; then
-        mkdir -p "$profile/extensions"
-        echo "$HOMETAB" > "$proxy"
-    fi
+    proxy "$profile/extensions/hometab@xeome" "$HOMETAB"
+    # No answer file means the next deploy asks again. Until it does, the
+    # extension stays as it is.
+    case "$voicenote" in
+        yes) proxy "$profile/extensions/voicenote@xeome" "$VOICENOTE" ;;
+        no) rm -f "$profile/extensions/voicenote@xeome" ;;
+    esac
 
     js="$profile/user.js"
     for pref in "${PREFS[@]}"; do

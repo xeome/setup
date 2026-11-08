@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "voicenote",
+  "description": "Shows a local whisper transcript of a WhatsApp Web voice note while it plays.",
+  "version": "1",
+  "browser_specific_settings": { "gecko": { "id": "voicenote@xeome" } },
+  "permissions": ["nativeMessaging"],
+  "background": { "scripts": ["wav.js", "background.js"] },
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["hook.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["island.js"],
+      "css": ["island.css"],
+      "run_at": "document_start"
+    }
+  ]
+}
