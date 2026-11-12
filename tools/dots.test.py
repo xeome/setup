@@ -13,7 +13,7 @@ spec = importlib.util.spec_from_file_location("dots", pathlib.Path(__file__).res
 dots = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(dots)
 
-HI = np.array([0xE6, 0xE7, 0xEA])  # Theme.qml's dark text
+HI = np.array([0xE6, 0xE7, 0xEA])  # the palette's dark text
 
 
 def bake(rgb):

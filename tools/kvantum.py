@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Builds graphite's Kvantum theme, the Qt side of the GTK themes, from
 KvLibadwaita: libadwaita's shapes, so Qt and GTK apps match, recoloured to
-Theme.qml and given graphite's two-line edges, corner glow and grain.
+home/.chezmoidata/palette.toml and given graphite's two-line edges, corner
+glow and grain.
 
-Generated, not committed: chezmoi runs this on apply whenever Theme.qml, this
-file or the grain tile changes (home/.chezmoiscripts/run_onchange_after_build-kvantum.sh.tmpl), so
-the Qt palette cannot drift from the shell's. check-palette.py runs it too.
+Generated, not committed: chezmoi runs this on apply whenever the palette,
+this file or the grain tile changes (home/.chezmoiscripts/run_onchange_after_build-kvantum.sh.tmpl).
 
     kvantum.py [OUTDIR]     default ~/.config/Kvantum/graphite
 
@@ -18,14 +18,15 @@ import pathlib
 import re
 import subprocess
 import sys
+import tomllib
 import xml.etree.ElementTree as ET
 
 REPO = "https://github.com/GabePoel/KvLibadwaita.git"
 PIN = "1f4e0bec44b13dabfa1fe4047aa8eeaccf2f3557"
 CACHE = pathlib.Path.home() / ".cache/kvlibadwaita-src"
-XEOME = pathlib.Path(__file__).resolve().parents[1] / "home/dot_config/exact_quickshell/exact_xeome"
-THEME = XEOME / "Theme.qml"
-GRAIN = XEOME / "grain-ground.png"
+HOME = pathlib.Path(__file__).resolve().parents[1] / "home"
+PALETTE = HOME / ".chezmoidata/palette.toml"
+GRAIN = HOME / "dot_config/exact_quickshell/exact_xeome/grain-ground.png"
 
 SVG_NS = "http://www.w3.org/2000/svg"
 XLINK = "{http://www.w3.org/1999/xlink}href"
@@ -60,12 +61,10 @@ def fetch():
 
 
 def tokens(mode):
-    """{name: (#rrggbb, alpha)} from Theme.qml, which writes #AARRGGBB."""
-    out = {}
-    for m in re.finditer(r'property color (\w+): light \? "#(\w{8})" : "#(\w{8})"', THEME.read_text()):
-        h = (m[2] if mode == "light" else m[3]).lower()
-        out[m[1]] = ("#" + h[2:], round(int(h[:2], 16) / 255, 3))
-    return out
+    """{name: (#rrggbb, alpha)} from the palette, which writes #rrggbb[aa]."""
+    palette = tomllib.loads(PALETTE.read_text())["palette"][mode]
+    return {name: (h[:7], round(int(h[7:] or "ff", 16) / 255, 3))
+            for name, h in palette.items() if isinstance(h, str)}
 
 
 def style_of(e):
@@ -533,7 +532,7 @@ def main(out):
 
 
 # Every colour KvLibadwaita paints, by (colour, alpha) as drawn, mapped to a
-# Theme.qml token. A value is a token (drawn at the token's alpha), (token,
+# palette token. A value is a token (drawn at the token's alpha), (token,
 # "keep") to keep upstream's alpha (shadow fades, disabled glyphs), or (token,
 # alpha). An upstream colour missing here stops the build: an unmapped
 # Adwaita grey or blue never reaches an app. The roles follow the GTK side:

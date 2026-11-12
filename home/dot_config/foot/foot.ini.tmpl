@@ -1,8 +1,7 @@
 # Caffeine — https://github.com/crynta/terax-ai src/modules/theme/themes/caffeine.ts
 #
-# Mirrors ~/.config/ghostty/themes/caffeine{,-light} and alacritty's
-# caffeine.toml, so a change here wants the same change there. The dark
-# background is graphite's panel from quickshell's Theme.qml.
+# The hues mirror ~/.config/ghostty/themes/caffeine{,-light} and alacritty's
+# caffeine.toml, so a change here wants the same change there.
 
 [main]
 font=JetBrainsMono Nerd Font:style=Medium:size=10
@@ -21,36 +20,35 @@ initial-color-theme=dark
 # Opaque, so contrast does not depend on what is behind the window.
 alpha=1.0
 
-background=0e0e10
-foreground=e6e7ea
+background={{ trimPrefix "#" .palette.dark.panel }}
+foreground={{ trimPrefix "#" .palette.dark.text }}
 
 # A bright block with the panel showing through the glyph. foot takes `text bg`.
-cursor=0e0e10 f7f8f8
+cursor={{ trimPrefix "#" .palette.dark.panel }} {{ trimPrefix "#" .palette.dark.bright }}
 
 # Selected text is inverted, text on ground, as vicinae selects it: a `sel`
 # wash is too faint to show a range in a terminal.
-selection-foreground=0a0a0c
-selection-background=e6e7ea
+selection-foreground={{ trimPrefix "#" .palette.dark.ground }}
+selection-background={{ trimPrefix "#" .palette.dark.text }}
 
-# Caffeine's `terminal.ansi` hues on graphite's neutrals: regular0/bright0 and
-# regular7/bright7 are Theme.qml's rule/dim and text/bright. regular0 is
-# `rule`, not a true black, because the background is already near-black.
-regular0=232427
+# regular0 is `rule`, not a true black, because the background is already
+# near-black.
+regular0={{ trimPrefix "#" .palette.dark.rule }}
 regular1=e06c75
 regular2=b5c98f
 regular3=ffd9a0
 regular4=8fb0d9
 regular5=cba6c9
 regular6=88c0c8
-regular7=e6e7ea
-bright0=8a8f98
+regular7={{ trimPrefix "#" .palette.dark.text }}
+bright0={{ trimPrefix "#" .palette.dark.dim }}
 bright1=ff8a93
 bright2=c9dba8
 bright3=ffe6c4
 bright4=a9c3e0
 bright5=ddc0db
 bright6=a4d4da
-bright7=f7f8f8
+bright7={{ trimPrefix "#" .palette.dark.bright }}
 
 [colors-light]
 alpha=1.0

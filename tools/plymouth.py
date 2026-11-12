@@ -22,7 +22,8 @@ SRC = ROOT / "home"
 OUT = ROOT / "infra/files/plymouth"
 FONT = SRC / "dot_local/private_share/fonts/Doto[ROND,wght].ttf"
 
-BRIGHT = (247, 248, 248, 255)  # Theme.qml bright
+DARK = tomllib.loads((SRC / ".chezmoidata/palette.toml").read_text())["palette"]["dark"]
+BRIGHT = (*bytes.fromhex(DARK["bright"][1:]), 255)
 UNLIT = (26, 26, 28, 255)      # Desk.qml's unlit dot
 SS = 4                         # supersampling
 

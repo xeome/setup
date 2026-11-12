@@ -1,10 +1,10 @@
 format = """$hostname$directory$git_branch$git_state$git_status$cmd_duration$python$fill$memory_usage$line_break$status$character"""
 
 [hostname]
-format = '[ $hostname ](bold fg:#f7f8f8 bg:#232427)'
+format = '[ $hostname ](bold fg:{{ .palette.dark.bright }} bg:{{ .palette.dark.rule }})'
 
 [directory]
-style = "bold fg:#f7f8f8 bg:#232427"
+style = "bold fg:{{ .palette.dark.bright }} bg:{{ .palette.dark.rule }}"
 format = '[ $path ]($style)'
 truncation_length = 4
 truncation_symbol = '…/'

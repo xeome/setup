@@ -1,0 +1,54 @@
+# Chrome. `default` is graphite's panel, the same black as the terminals; the
+# bars are `raised`, so zathura's surfaces line up with the shell's.
+set default-bg                  "{{ .palette.dark.panel }}"
+set default-fg                  "{{ .palette.dark.text }}"
+set statusbar-bg                "{{ .palette.dark.raised }}"
+set statusbar-fg                "{{ .palette.dark.text }}"
+set inputbar-bg                 "{{ .palette.dark.raised }}"
+set inputbar-fg                 "{{ .palette.dark.text }}"
+set notification-bg             "{{ .palette.dark.raised }}"
+set notification-fg             "{{ .palette.dark.text }}"
+
+# graphite's `hot` and `warm`, both carrying ground-coloured text.
+set notification-error-bg       "{{ .palette.dark.hot }}"
+set notification-error-fg       "{{ .palette.dark.ground }}"
+set notification-warning-bg     "{{ .palette.dark.warm }}"
+set notification-warning-fg     "{{ .palette.dark.ground }}"
+
+# No accent: a selected row is one neutral step up with bright text.
+set completion-bg               "{{ .palette.dark.raised }}"
+set completion-fg               "{{ .palette.dark.text }}"
+set completion-group-bg         "{{ .palette.dark.rule }}"
+set completion-group-fg         "{{ .palette.dark.dim }}"
+set completion-highlight-bg     "{{ .palette.dark.rule }}"
+set completion-highlight-fg     "{{ .palette.dark.bright }}"
+
+set index-bg                    "{{ .palette.dark.panel }}"
+set index-fg                    "{{ .palette.dark.text }}"
+set index-active-bg             "{{ .palette.dark.rule }}"
+set index-active-fg             "{{ .palette.dark.bright }}"
+
+# Every search hit wears a neutral wash and only the current one wears warm,
+# graphite's focus colour, so n/N stays readable. Alpha because these
+# composite over the page.
+set highlight-color             rgba({{ includeTemplate "rgb" .palette.dark.text | replace " " "" }},0.25)
+set highlight-active-color      rgba({{ includeTemplate "rgb" .palette.dark.warm | replace " " "" }},0.60)
+set highlight-fg                "{{ .palette.dark.ground }}"
+
+set render-loading              true
+set render-loading-bg           "{{ .palette.dark.panel }}"
+set render-loading-fg           "{{ .palette.dark.text }}"
+
+# Recolor maps a document's white and black onto panel and text.
+set recolor                     true
+set recolor-lightcolor          "{{ .palette.dark.panel }}"
+set recolor-darkcolor           "{{ .palette.dark.text }}"
+
+set window-title-home-tilde true
+set statusbar-basename true
+set selection-clipboard clipboard
+set adjust-open "width"
+set guioptions ""
+set first-page-column 1:2
+map j feedkeys "<C-Down>"
+map k feedkeys "<C-Up>"

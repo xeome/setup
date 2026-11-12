@@ -6,7 +6,7 @@ import { isoWeek, greeting } from "../home/dot_config/exact_quickshell/exact_xeo
 
 const DIR = new URL("../home/dot_config/zen/hometab/", import.meta.url);
 const JS = readFileSync(new URL("hometab.js", DIR), "utf8");
-const CSS = readFileSync(new URL("hometab.css", DIR), "utf8");
+const CSS = readFileSync(new URL("hometab.css.tmpl", DIR), "utf8");
 
 // Loads given the same `store` share localStorage, as hometabs do.
 function load(store, start, reply) {

@@ -9,15 +9,15 @@ overlay darkens, white where it lightens. Overlay depends on the colour
 underneath, so each ground gets its own tile.
 
 Needs rsvg-convert, numpy, scipy and pillow. Run it by hand after changing
-`ground`, `panel` or `raised` in Theme.qml, then apply (the Qt theme rebuilds
-itself):
+`ground`, `panel` or `raised` in home/.chezmoidata/palette.toml, then apply
+(the Qt theme rebuilds itself):
 
     ~/.local/share/chezmoi/tools/grain.py
 """
 import io
 import pathlib
-import re
 import subprocess
+import tomllib
 
 import numpy as np
 from PIL import Image, ImageOps
@@ -28,14 +28,11 @@ SVG = b"""<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filt
 
 SRC = pathlib.Path(__file__).resolve().parents[1] / "home"
 OUT = SRC / "dot_config/exact_quickshell/exact_xeome"
-THEME = OUT / "Theme.qml"
 
-# The dark grounds, read from Theme.qml. Quickshell never draws panel; the GTK
-# and Discord themes put it under their views.
-GROUNDS = {
-    m[1]: "#" + m[2][2:]
-    for m in re.finditer(r'property color (ground|panel|raised): light \? "#\w{8}" : "#(\w{8})"', THEME.read_text())
-}
+# Quickshell never draws panel; the GTK and Discord themes put it under their
+# views.
+DARK = tomllib.loads((SRC / ".chezmoidata/palette.toml").read_text())["palette"]["dark"]
+GROUNDS = {k: DARK[k] for k in ("ground", "panel", "raised")}
 
 
 def render():

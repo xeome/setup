@@ -1,0 +1,53 @@
+/* graphite light for GTK3: adw-gtk3 with graphite's colours on top.
+ * A theme folder rather than ~/.config/gtk-3.0/gtk.css because GTK reads the
+ * user stylesheet once at app start, while a gtk-theme switch (theme-toggle)
+ * restyles running apps. */
+@import url("file:///usr/share/themes/adw-gtk3/gtk-3.0/gtk.css");
+
+{{ template "gtk-colors.css" .palette.light }}
+@define-color graphite_lift {{ template "rgba" .palette.light.lift }};
+
+/* The accent is the text colour and adw-gtk3's switch knob is white, so an
+ * "on" switch would be a white knob on a near-white track. The knob takes the
+ * ground instead, as in gtk-4.0/gtk.css. The headerbar selectors out-rank
+ * adw-gtk3's unfocused-window knob; a disabled switch keeps its faded knob. */
+switch:checked:not(:disabled) slider,
+headerbar switch:backdrop:checked:not(:disabled) > slider,
+.titlebar switch:backdrop:checked:not(:disabled) > slider {
+  background-color: @accent_fg_color;
+}
+
+/* Thunar and other GTK3 apps that draw their own rows fill a selected row with
+ * theme_selected_bg_color (thunar-util.c), which adw-gtk3 aliases to the
+ * accent, under text in the window's text colour. The accent is the text
+ * colour, so the label would vanish. These use the colour adw-gtk3's own lists
+ * draw, a quarter of the accent over the view, opaque because those apps
+ * paint it without blending. */
+@define-color theme_selected_bg_color mix(@view_bg_color, @accent_bg_color, 0.25);
+@define-color theme_selected_fg_color @window_fg_color;
+@define-color theme_unfocused_selected_bg_color mix(@view_bg_color, @accent_bg_color, 0.25);
+@define-color theme_unfocused_selected_fg_color @window_fg_color;
+
+/* Every edge is two lines: the translucent line, then a dark ring outside it,
+ * without changing any control's size. A button's line is the 1px border
+ * adw-gtk3 already gives it, transparent: flat buttons (header bars, toolbars,
+ * .flat) reset its colour, and no state touches it. Its ring is a shadow,
+ * which adw-gtk3 drops while a button is hovered, pressed or checked. */
+button {
+  border-color: @borders;
+  box-shadow: 0 0 0 1px @shade_color;
+}
+
+entry,
+spinbutton:not(.vertical) {
+  box-shadow: inset 0 0 0 1px @borders, 0 0 0 1px @shade_color;
+}
+
+frame > border {
+  box-shadow: 0 0 0 1px @shade_color;
+}
+
+popover.background {
+  border-color: @borders;
+  box-shadow: 0 0 0 1px @shade_color;
+}
