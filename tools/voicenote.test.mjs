@@ -389,7 +389,9 @@ for (const reply of [{ text: "kısa", seconds: 2 }, { text: "kısa" }]) {
     const manifest = JSON.parse(read("manifest.json"));
     assert.ok(manifest.permissions.includes("storage"), "the manifest asks for no storage permission");
     assert.equal(manifest.browser_action?.default_area, "navbar", "the button would land in the extensions panel");
-    assert.ok(existsSync(new URL(manifest.browser_action.default_icon, DIR)), "the button's icon is missing");
+    // chezmoi deploys icon.svg.tmpl as icon.svg.
+    const icon = manifest.browser_action.default_icon;
+    assert.ok(existsSync(new URL(icon, DIR)) || existsSync(new URL(icon + ".tmpl", DIR)), "the button's icon is missing");
 }
 
 {

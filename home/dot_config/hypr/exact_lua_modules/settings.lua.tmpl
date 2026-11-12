@@ -3,9 +3,9 @@
 -- Graphite edges: a translucent white border, brighter on the focused window,
 -- with a sharp 1px dark shadow outside it. Focus is told by lightness alone:
 -- the border's, and unfocused windows dimmed (decoration below).
-local focus = "rgba(ffffff80)"
-local line = "rgba(ffffff14)"
-local ring = "rgba(0000004d)"
+local focus = "rgba({{ trimPrefix "#" .palette.dark.focus }})"
+local line = "rgba({{ trimPrefix "#" .palette.dark.line }})"
+local ring = "rgba({{ trimPrefix "#" .palette.dark.ring }})"
 
 hl.config({
   -- Tab groups wear the same edges, locked or not. Without gradients the
@@ -21,8 +21,8 @@ hl.config({
       enabled = true,
       font_family = "Inter",
       font_size = 8,
-      text_color = "rgba(e6e7eaff)",
-      text_color_inactive = "rgba(8a8f98ff)",
+      text_color = "rgba({{ trimPrefix "#" .palette.dark.text }}ff)",
+      text_color_inactive = "rgba({{ trimPrefix "#" .palette.dark.dim }}ff)",
       col = {
         active = focus,
         inactive = line,

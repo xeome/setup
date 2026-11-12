@@ -1,0 +1,4 @@
+{{- /* "#rrggbbaa" -> "rgba(r, g, b, a)", a rounded to two places; "#rrggbb" gets a = 1. */ -}}
+{{- $a := 255 -}}
+{{- if eq (len .) 9 }}{{ $a = int (print "0x" (substr 7 9 .)) }}{{ end -}}
+rgba({{ template "rgb" . }}, {{ round (divf $a 255) 2 }})

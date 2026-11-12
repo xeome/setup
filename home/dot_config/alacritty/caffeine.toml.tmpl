@@ -1,0 +1,41 @@
+# Caffeine — https://github.com/crynta/terax-ai src/modules/theme/themes/caffeine.ts
+#
+# The hues mirror ~/.config/ghostty/themes/caffeine and
+# ~/.config/foot/foot.ini, so a change here wants the same change there.
+
+[colors.primary]
+foreground = "{{ .palette.dark.text }}"
+background = "{{ .palette.dark.panel }}"
+
+# A bright block with the panel showing through the glyph.
+[colors.cursor]
+text = "{{ .palette.dark.panel }}"
+cursor = "{{ .palette.dark.bright }}"
+
+# Selected text is inverted, text on ground, as vicinae selects it: a `sel`
+# wash is too faint to show a range in a terminal.
+[colors.selection]
+text = "{{ .palette.dark.ground }}"
+background = "{{ .palette.dark.text }}"
+
+# Black is `rule`, not a true black, because the background is already
+# near-black.
+[colors.normal]
+black = "{{ .palette.dark.rule }}"
+white = "{{ .palette.dark.text }}"
+red = "#e06c75"
+green = "#b5c98f"
+yellow = "#ffd9a0"
+blue = "#8fb0d9"
+magenta = "#cba6c9"
+cyan = "#88c0c8"
+
+[colors.bright]
+black = "{{ .palette.dark.dim }}"
+white = "{{ .palette.dark.bright }}"
+red = "#ff8a93"
+green = "#c9dba8"
+yellow = "#ffe6c4"
+blue = "#a9c3e0"
+magenta = "#ddc0db"
+cyan = "#a4d4da"

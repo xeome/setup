@@ -1,12 +1,9 @@
-# Graphite colours, the same values as hyprland's lua_modules/settings.lua and
-# quickshell's Theme.qml. Managed by chezmoi.
-
-set $background #0a0a0c
-set $text       #e6e7ea
-set $dim        #8a8f98
-set $focus      #ffffff80
-set $hot        #e2715a
-set $line       #ffffff14
+set $background {{ .palette.dark.ground }}
+set $text       {{ .palette.dark.text }}
+set $dim        {{ .palette.dark.dim }}
+set $focus      {{ .palette.dark.focus }}
+set $hot        {{ .palette.dark.hot }}
+set $line       {{ .palette.dark.line }}
 
 # Columns: border, background, text, indicator, child_border.
 client.focused          $focus      $background $text        $focus      $focus

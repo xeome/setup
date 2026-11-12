@@ -1,17 +1,16 @@
-/* Theme.qml's dark palette; check-palette.py holds these values to it. Dark
- * only: the island is black on either WhatsApp theme. all: initial keeps
+/* Dark only: the island is black on either WhatsApp theme. all: initial keeps
  * WhatsApp's own rules off these elements. */
 
 voicenote-island, voicenote-island * { all: initial; }
 
 voicenote-island {
-  --text: #e6e7ea;
-  --dim: #8a8f98;
-  --warm: #e5ae52;
-  --line: rgba(255, 255, 255, 0.08);
-  --ring: rgba(0, 0, 0, 0.3);
-  --lift: rgba(255, 255, 255, 0.05);
-  --hover: rgba(255, 255, 255, 0.05);
+  --text: {{ .palette.dark.text }};
+  --dim: {{ .palette.dark.dim }};
+  --warm: {{ .palette.dark.warm }};
+  --line: {{ template "rgba" .palette.dark.line }};
+  --ring: {{ template "rgba" .palette.dark.ring }};
+  --lift: {{ template "rgba" .palette.dark.lift }};
+  --hover: {{ template "rgba" .palette.dark.hover }};
 
   position: fixed;
   z-index: 2147483647;

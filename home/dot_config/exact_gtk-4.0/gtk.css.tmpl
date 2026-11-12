@@ -1,0 +1,106 @@
+/* graphite for GTK4 and libadwaita. libadwaita ignores gtk-theme, so this
+ * one file carries both modes and follows the color-scheme setting through the
+ * media query, live, in running apps. */
+{{ template "gtk-colors.css" .palette.dark }}
+/* graphite's corner glow and a card's lit top edge. */
+@define-color graphite_glow {{ template "rgba" .palette.dark.glow }};
+@define-color graphite_lift {{ template "rgba" .palette.dark.lift }};
+@define-color graphite_glow_panel_far {{ template "rgba" .palette.dark.glowPanelFar }};
+
+@media (prefers-color-scheme: light) {
+{{ template "gtk-colors.css" .palette.light }}
+  @define-color graphite_lift {{ template "rgba" .palette.light.lift }};
+}
+
+/* --- Shape, not colour. Selectors are GTK's documented CSS node names. This
+ * file loads at GTK's user priority, which ranks above libadwaita whatever
+ * the specificity. --- */
+
+:root {
+  /* libadwaita's floating windows draw 15px corners; Hyprland clips tiled
+   * windows to 10. */
+  --window-radius: 10px;
+}
+
+/* The accent is the text colour and libadwaita's switch knob is white, so an
+ * "on" switch would be a white knob on a near-white track. The knob takes the
+ * ground instead, like calendar's today. */
+switch:checked > slider {
+  background-color: @accent_fg_color;
+}
+
+/* For the same reason a selected tab would be a solid light block. Graphite
+ * selects with 7% of the text tone, and hovers with 5%. */
+tabbar tab:selected,
+tabbar tab:selected:hover,
+tabbar tab:selected:active {
+  background-color: alpha(@window_fg_color, 0.07);
+  color: @window_fg_color;
+}
+
+tabbar tab:hover {
+  background-color: alpha(@window_fg_color, 0.05);
+}
+
+toolbarview > .top-bar tabbar .box {
+  box-shadow: none;
+  border-bottom: 1px solid @borders;
+}
+
+/* Menus, dialogs and toasts get graphite's edge: the translucent line, with a
+ * dark ring outside it. */
+popover > contents,
+floating-sheet > sheet,
+toast {
+  border: 1px solid @borders;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px @shade_color;
+}
+
+/* Graphite's surface, dark mode only: a colourless glow from the window's
+ * top-left corner under a grain (grain.py bakes one tile per ground). Split
+ * views cover that corner with an opaque sidebar, so it carries the same.
+ * url() is relative to this file, so the tiles sit beside it. */
+@media (prefers-color-scheme: dark) {
+  window.background,
+  .sidebar-pane {
+    background-image: url("grain-ground.png"),
+      radial-gradient(circle 360px at 0 0, @graphite_glow, alpha(@graphite_glow, 0));
+    background-repeat: repeat, no-repeat;
+  }
+
+  /* Views are graphite's inset panel: two glows, the ground's top-left and a
+   * fainter one top-right, as in the shell's Surface.qml. GtkTreeView paints
+   * every cell again with the view's style plus a `cell` class, so cells drop
+   * the images: each would draw its own glow from its own corner. */
+  .view {
+    background-image: url("grain-panel.png"),
+      radial-gradient(circle 360px at 0 0, @graphite_glow, alpha(@graphite_glow, 0)),
+      radial-gradient(circle 300px at 100% 0, @graphite_glow_panel_far, alpha(@graphite_glow_panel_far, 0));
+    background-repeat: repeat, no-repeat, no-repeat;
+  }
+
+  .view.cell,
+  iconview.cell {
+    background-image: none;
+  }
+}
+
+/* Every edge is two lines: the translucent line, then a dark ring outside it,
+ * drawn as shadows so no control changes size. libadwaita's own buttons keep
+ * their shape: it marks which are flat with dozens of private selectors, and
+ * this file outranks all of them. */
+entry:not(.flat),
+spinbutton:not(.flat),
+dropdown:not(.flat) > button {
+  box-shadow: inset 0 0 0 1px @borders, 0 0 0 1px @shade_color;
+}
+
+.card,
+list.boxed-list {
+  box-shadow: inset 0 1px @graphite_lift, inset 0 0 0 1px @borders, 0 0 0 1px @shade_color;
+}
+
+frame {
+  box-shadow: 0 0 0 1px @shade_color;
+}

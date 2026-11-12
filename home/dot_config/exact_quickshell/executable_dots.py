@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Bakes wallpapers into a dot matrix: the image is cut into 15 px cells and
 each cell becomes one round dot, its brightness the cell's grey, from true
-black up to CAP of Theme.qml's `text`, so the wallpaper never outshines the
+black up to CAP of the palette's dark `text`, so the wallpaper never outshines the
 text over it. Each dot keeps SAT of the cell's own colour, so a grey photo
 bakes grey; the cap holds for the grey, while a saturated dot's strongest
 channel can sit a little above it (cyan reaches 209 where white stops at 199). The dots dim towards the corners and carry a little grain. True
@@ -23,8 +23,8 @@ Checked by tools/dots.test.py.
 import argparse
 import os
 import pathlib
-import re
 import subprocess
+import tomllib
 
 import numpy as np
 from PIL import Image, ImageOps
@@ -94,12 +94,10 @@ def dots(im, hi):
 
 
 def text_grey():
-    """Theme.qml's dark `text`, from the chezmoi source as grain.py reads its
-    grounds: the brightest a dot gets."""
+    """The brightest a dot gets."""
     src = subprocess.run(["chezmoi", "source-path"], capture_output=True, text=True, check=True).stdout.strip()
-    theme = pathlib.Path(src, "dot_config/exact_quickshell/exact_xeome/Theme.qml").read_text()
-    hexc = re.search(r'property color text: light \? "#\w{8}" : "#\w\w(\w{6})"', theme)[1]
-    return np.array([int(hexc[i : i + 2], 16) for i in (0, 2, 4)])
+    palette = tomllib.loads(pathlib.Path(src, ".chezmoidata/palette.toml").read_text())
+    return np.array(list(bytes.fromhex(palette["palette"]["dark"]["text"][1:])))
 
 
 if __name__ == "__main__":

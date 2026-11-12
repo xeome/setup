@@ -1,0 +1,70 @@
+# The graphite palette (the graphite-ui skill), the one source for every
+# themed config: templates read it as {{ .palette.dark.text }}, and
+# kvantum.py, grain.py, plymouth.py and dots.py read this file.
+#
+# Opaque colours are #rrggbb, translucent ones #rrggbbaa. The partials in
+# .chezmoitemplates/ write them in the notations other programs want.
+
+[palette.dark]
+# Grounds: the bar is `ground`, everything floating is `raised`, and `panel`
+# is a window's background (terminals, GTK views, the desk's tiles).
+ground = "#0a0a0c"
+panel = "#0e0e10"
+raised = "#151618"
+rule = "#232427"    # slider troughs
+
+# Two tones carry hierarchy: bright for titles and values, dim for labels and
+# metadata. text is everything else that is read, not scanned.
+text = "#e6e7ea"
+bright = "#f7f8f8"
+dim = "#8a8f98"
+
+# Colour is spent on meaning only. warm is focus and a live microphone, hot is
+# something that wants you (low battery, urgent workspace, a critical
+# notification). Selection is not a colour: it is `sel`.
+warm = "#e5ae52"
+hot = "#e2715a"
+success = "#b5c98f"   # status only: GTK and vicinae
+
+# Every edge is two lines: `line` one pixel in, `ring` as the outer pixel.
+line = "#ffffff14"
+ring = "#0000004d"
+focus = "#ffffff80"   # the focused window's border (hyprland, sway)
+lift = "#ffffff0d"    # a card's top edge
+card = "#ffffff05"    # bar modules: nearly clear
+hover = "#ffffff0d"
+sel = "#ffffff12"
+
+# Corner glow, colourless and gone within a few hundred pixels.
+glow = "#ffffff0d"           # the bar
+glowPanel = "#ffffff11"      # raised, top-left
+glowPanelFar = "#ffffff08"   # raised, top-right
+
+# line, hover and sel composited over a ground, for programs that draw alpha
+# as solid (vicinae). Recompute them when those tokens change.
+[palette.dark.flat]
+line = "#1d1d1f"         # over ground
+hover = "#161618"        # over ground
+sel = "#1b1b1d"          # over ground
+hoverRaised = "#212224"
+
+[palette.light]
+ground = "#ededef"
+panel = "#f8f8f9"
+raised = "#ffffff"
+rule = "#cfcfd3"
+text = "#26272b"
+bright = "#0f1011"
+dim = "#62666d"
+warm = "#885b0c"
+hot = "#af3a1e"
+success = "#276d77"
+line = "#00000017"
+ring = "#0000000a"
+lift = "#ffffffcc"
+card = "#ffffff80"
+hover = "#0000000a"
+sel = "#0000000e"
+glow = "#ffffffb3"
+glowPanel = "#ffffffe6"
+glowPanelFar = "#ffffff66"

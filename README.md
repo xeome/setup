@@ -2,31 +2,16 @@ This is my personal repo for my Arch linux configurations.
 
 # Layout
 
-```
-home/     what chezmoi writes into ~ (.chezmoiroot points here)
-  .chezmoidata.toml   what differs per machine: wm, monitors, text scale
-  .chezmoiscripts/    what runs on apply: the infra deploy, the Kvantum build, gsettings
-  dot_config/         ~/.config, one folder per program
-  dot_local/          ~/.local: bin/ scripts, GTK themes, fonts
-infra/    what lands outside ~: packages and /etc drop-ins (pyinfra)
-  deploy.py           one section per concern, matching the folders in files/
-  files/              the files deploy.py puts, by concern
-tools/    never deployed; run from the repo
-  grain.py, plymouth.py   bake the committed grain tiles and boot splash; run by hand
-  kvantum.py              builds the Qt theme; apply runs it when its inputs change
-  check-palette.py        holds every copied colour to Theme.qml; run after a palette edit
-  *.test.*                checks for scripts that do deploy
-```
+- `home/` is what chezmoi writes into `~` (`.chezmoiroot` points here).
+- `infra/` is what lands outside `~`: packages and `/etc` drop-ins, deployed
+  by pyinfra.
+- `tools/` is never deployed: build scripts and tests, run from the repo.
 
-Names under `home/` are chezmoi's: `dot_` is a leading dot, `exact_` makes
-chezmoi delete anything in that folder it does not manage, `private_` sets
-mode 0700/0600, `executable_` sets the x bit, `modify_` is a script that
-rewrites a file the program also edits, and `.tmpl` files are templates.
-
-The graphite palette is defined once, in
-`home/dot_config/exact_quickshell/exact_xeome/Theme.qml`. The GTK, terminal,
-compositor, Discord, browser and launcher themes repeat its values, and
-`tools/check-palette.py` fails when one drifts.
+The graphite palette is defined once, in `home/.chezmoidata/palette.toml`.
+Every themed config is a chezmoi template that reads it. After changing
+`ground`, `panel` or `raised`, run `tools/grain.py` to re-bake the grain
+tiles. The boot console's colours in `infra/files/boot/cmdline` copy three
+values by hand.
 
 Zen's new tab and homepage are `home/dot_config/zen/hometab`, an unsigned
 extension that `chezmoi apply` points every Zen profile at. Zen installs it
@@ -92,7 +77,7 @@ After adding a machine, run `tools/plymouth.py` to draw its wordmark.
 Incomplete but should get you most things.
 
 ```bash
-chezmoi init https://github.com/xeome/dots
+chezmoi init https://github.com/xeome/setup
 chezmoi apply -v
 ```
 
