@@ -1,12 +1,12 @@
-// node tools/hometab.test.mjs — checks home/dot_config/zen/hometab.
+// node tools/hometab.test.mjs — checks home/.config/zen/hometab.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
-import { isoWeek, greeting } from "../home/dot_config/exact_quickshell/exact_xeome/Calc.mjs";
+import { isoWeek, greeting } from "../home/.config/quickshell/xeome/Calc.mjs";
 
-const DIR = new URL("../home/dot_config/zen/hometab/", import.meta.url);
+const DIR = new URL("../home/.config/zen/hometab/", import.meta.url);
 const JS = readFileSync(new URL("hometab.js", DIR), "utf8");
-const CSS = readFileSync(new URL("hometab.css.tmpl", DIR), "utf8");
+const CSS = readFileSync(new URL("hometab.css.j2", DIR), "utf8");
 
 // Loads given the same `store` share localStorage, as hometabs do.
 function load(store, start, reply) {

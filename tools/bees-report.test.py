@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""python3 -I tools/bees-report.test.py — checks home/dot_local/bin/executable_bees-report.
+"""python3 -I tools/bees-report.test.py — checks home/.local/bin/bees-report.
 The lines are trimmed copies of real bees journal lines."""
 import importlib.machinery
 import importlib.util
@@ -7,12 +7,12 @@ import pathlib
 import sys
 
 sys.dont_write_bytecode = True
-path = str(pathlib.Path(__file__).resolve().parents[1] / "home/dot_local/bin/executable_bees-report")
+path = str(pathlib.Path(__file__).resolve().parents[1] / "home/.local/bin/bees-report")
 spec = importlib.util.spec_from_loader("bees_report", importlib.machinery.SourceFileLoader("bees_report", path))
 bees_report = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(bees_report)
 
-P = "xeome-desktop beesd[952]:"
+P = "host beesd[952]:"
 lines = [
     # One 12K extent referenced from two snapshots: deduped twice, freed once.
     f"2026-10-10T02:21:41+03:00 {P} ref_469229d000_12K_10[697631]: dedup: src 34.688K [0x0..0x8ac0] {{0x42ae122000z0}} /a",

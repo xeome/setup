@@ -1,0 +1,39 @@
+# Caffeine — https://github.com/crynta/terax-ai src/modules/theme/themes/caffeine.ts
+#
+# The hues are TERMINAL in infra/data.py, which ghostty's caffeine themes and
+# foot.ini read too.
+
+[colors.primary]
+foreground = "{{ palette.dark.text }}"
+background = "{{ palette.dark.panel }}"
+
+# A bright block with the panel showing through the glyph.
+[colors.cursor]
+text = "{{ palette.dark.panel }}"
+cursor = "{{ palette.dark.bright }}"
+
+# Selected text is inverted, text on ground, as vicinae selects it: a `sel`
+# wash is too faint to show a range in a terminal.
+[colors.selection]
+text = "{{ palette.dark.ground }}"
+background = "{{ palette.dark.text }}"
+
+[colors.normal]
+black = "{{ term.dark.normal.black }}"
+white = "{{ term.dark.normal.white }}"
+red = "{{ term.dark.normal.red }}"
+green = "{{ term.dark.normal.green }}"
+yellow = "{{ term.dark.normal.yellow }}"
+blue = "{{ term.dark.normal.blue }}"
+magenta = "{{ term.dark.normal.magenta }}"
+cyan = "{{ term.dark.normal.cyan }}"
+
+[colors.bright]
+black = "{{ term.dark.bright.black }}"
+white = "{{ term.dark.bright.white }}"
+red = "{{ term.dark.bright.red }}"
+green = "{{ term.dark.bright.green }}"
+yellow = "{{ term.dark.bright.yellow }}"
+blue = "{{ term.dark.bright.blue }}"
+magenta = "{{ term.dark.bright.magenta }}"
+cyan = "{{ term.dark.bright.cyan }}"

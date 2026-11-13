@@ -9,15 +9,15 @@ overlay darkens, white where it lightens. Overlay depends on the colour
 underneath, so each ground gets its own tile.
 
 Needs rsvg-convert, numpy, scipy and pillow. Run it by hand after changing
-`ground`, `panel` or `raised` in home/.chezmoidata/palette.toml, then apply
+`ground`, `panel` or `raised` in infra/data.py, then apply
 (the Qt theme rebuilds itself):
 
     ~/.local/share/chezmoi/tools/grain.py
 """
 import io
 import pathlib
+import runpy
 import subprocess
-import tomllib
 
 import numpy as np
 from PIL import Image, ImageOps
@@ -26,13 +26,16 @@ from scipy.ndimage import gaussian_filter, zoom
 # graphite's --grain, verbatim.
 SVG = b"""<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='.33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 0 1'/></filter><rect width='100%' height='100%' filter='url(#n)' opacity='.3'/></svg>"""
 
-SRC = pathlib.Path(__file__).resolve().parents[1] / "home"
-OUT = SRC / "dot_config/exact_quickshell/exact_xeome"
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+SRC = ROOT / "home"
+OUT = SRC / ".config/quickshell/xeome"
 
 # Quickshell never draws panel; the GTK and Discord themes put it under their
 # views.
-DARK = tomllib.loads((SRC / ".chezmoidata/palette.toml").read_text())["palette"]["dark"]
+DARK = runpy.run_path(str(ROOT / "infra/data.py"))["PALETTE"]["dark"]
 GROUNDS = {k: DARK[k] for k in ("ground", "panel", "raised")}
+# panel's tile is not deployed: discord-theme.css embeds it.
+TILES = {"ground": OUT, "panel": ROOT / "infra/templates", "raised": OUT}
 
 
 def render():
@@ -85,7 +88,7 @@ def lock(g, a, w=2560, h=1440):
 def office(g, a, w=2560, h=1440):
     """The office photo in grey, its black lifted to the shell ground, with the
     grain. Cropped to the largest monitor so the grain lands 1:1 on its pixels."""
-    im = ImageOps.fit(Image.open(SRC / "dot_config/wallpapers/office.jpg"), (w, h), Image.LANCZOS)
+    im = ImageOps.fit(Image.open(SRC / ".config/wallpapers/office.jpg"), (w, h), Image.LANCZOS)
     x = np.asarray(im.convert("L"), float)[..., None] / 255
     # An S-curve through 0 and 1. `c` is the contrast; `p` is the grey where it
     # turns from darkening to brightening. Tuned by eye.
@@ -115,19 +118,19 @@ if __name__ == "__main__":
         base = int(hexc[1:3], 16) / 255  # graphite's grounds are near-neutral
         tile = bake(base, g, a)
         Image.fromarray(np.round(tile * 255).astype(np.uint8), "RGBA").save(
-            OUT / f"grain-{name}.png", optimize=True
+            TILES[name] / f"grain-{name}.png", optimize=True
         )
         print(f"grain-{name}.png  max alpha {tile[..., 3].max():.3f}")
     # GTK's url() is relative to the stylesheet, so each dark one gets copies.
-    for folder in ("dot_config/exact_gtk-4.0", "dot_local/private_share/exact_themes/exact_graphite-dark/gtk-3.0"):
+    for folder in (".config/gtk-4.0", ".local/share/themes/graphite-dark/gtk-3.0"):
         for name in ("ground", "panel"):
-            (SRC / folder / f"grain-{name}.png").write_bytes((OUT / f"grain-{name}.png").read_bytes())
+            (SRC / folder / f"grain-{name}.png").write_bytes((TILES[name] / f"grain-{name}.png").read_bytes())
     print("GTK tile copies")
     Image.fromarray(np.round(lock(g, a) * 255).astype(np.uint8), "RGB").save(
-        SRC / "dot_config/hypr/graphite-lock.png", optimize=True
+        SRC / ".config/hypr/graphite-lock.png", optimize=True
     )
     print("hypr/graphite-lock.png")
     Image.fromarray(np.round(office(g, a) * 255).astype(np.uint8), "RGB").save(
-        SRC / "dot_config/wallpapers/office-graphite.jpg", quality=95
+        SRC / ".config/wallpapers/office-graphite.jpg", quality=95
     )
     print("wallpapers/office-graphite.jpg")

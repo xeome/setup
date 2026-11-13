@@ -1,12 +1,10 @@
 """
 Everything this repo puts outside $HOME: the machine's packages, and drop-ins
-under /etc. .chezmoiscripts/run_onchange_before_pyinfra.sh.tmpl runs it from
-this directory whenever a file here or the machine's wm or hostname changes:
-
-    uvx pyinfra@3.10.0 -y --sudo @local deploy.py --data wm=hyprland --data hostname=xeome-desktop
-
-hostname is the .chezmoidata.toml key, so the plymouth watermark always matches
-the machine entry chezmoi rendered. Laptop or desktop the deploy asks for.
+under /etc. apply.py includes it, under sudo, whenever a file it reads or
+what data.py's system_inputs() hands it changed: the machine's hostname and
+wm, whether it is the exit node, and the console's colours. To run it
+regardless, delete ~/.local/state/dots/system.sha256, then run `dots`. Laptop
+or desktop the deploy asks for.
 
 Every file goes to a drop-in directory, so the distro's own config stays stock,
 except where a program has none: the boot section names those files.
@@ -44,7 +42,7 @@ PACKAGES = {
             "op": pacman.packages,
             "common": [
                 "adw-gtk-theme", "age", "autotiling-rs", "bc", "bitwarden", "brightnessctl",
-                "btop", "chezmoi", "evince", "fd", "fzf", "ghostty", "git-delta",
+                "btop", "evince", "fd", "fzf", "ghostty", "git-delta",
                 "gnome-keyring", "grc", "gsettings-desktop-schemas", "gtk-update-icon-cache",
                 "htop", "hyprlock", "inter-font", "jq", "kdeconnect", "kvantum", "kvantum-qt5",
                 "libnotify", "mate-polkit", "most", "neovim", "network-manager-applet",
@@ -87,7 +85,7 @@ assert isinstance(hostname, str) and hostname, hostname
 root_fs, _, root_uuid = host.get_fact(Command, "findmnt -rno FSTYPE,UUID /").partition(" ")
 bees = chassis == "desktop" and root_fs == "btrfs"
 # Asked once per machine, before any op runs, because the model is 574 MB.
-# The answer file also tells run_after_link-zen-chrome.sh whether to link the
+# The answer file also tells scripts/link-zen-chrome.sh whether to link the
 # extension. Delete it to be asked again on the next deploy. Until then the
 # extension stays linked or unlinked as it was.
 voicenote = ask_once("~/.local/state/dots/voicenote",
@@ -108,6 +106,7 @@ def put(src, dest, mode="644"):
 repo = family["repo"]
 repo["op"](name="Packages", packages=repo["common"] + repo[wm])
 repo["op"](name="Retired: bitwarden-cli, replaced by rbw", packages=["bitwarden-cli"], present=False)
+repo["op"](name="Retired: chezmoi, replaced by apply.py", packages=["chezmoi"], present=False)
 
 
 # No: the models go, the packages stay (see PACKAGES on removed names).
@@ -187,7 +186,7 @@ dns = [
 # user@.service, so the pressure kill never picks it. The swap kill covers
 # every cgroup, so session scopes are omitted: a swap kill once picked the
 # session scope for Zen's swap and took the compositor with it. Heavy apps
-# launch into their own scopes (app() in hypr/hyprland.lua.tmpl), so they
+# launch into their own scopes (app() in hypr/hyprland.lua), so they
 # stay killable. ~/.local/bin/memwatch warns before either kill.
 oom_units = [
     put("oom/slice.conf", "/etc/systemd/system/-.slice.d/50-dots-oomd.conf"),
@@ -223,8 +222,8 @@ tlp = [
 # save `wg showconf utun420` as ws-exit.conf without FwMark and ListenPort, add
 # utun420's IPv4 address as Address, disconnect the app, then
 #   nmcli connection import type wireguard file ws-exit.conf
-# Then run this deploy by hand right away, because until it runs the profile
-# tunnels every packet.
+# Then delete ~/.local/state/dots/system.sha256 and run `dots` right away,
+# because until this deploy runs the profile tunnels every packet.
 #
 # Values as nmcli -g prints them ("0", not "no"), so they compare with its output.
 EXIT_PROFILE = {
@@ -236,7 +235,7 @@ EXIT_PROFILE = {
     "ipv6.method": "disabled",
     "connection.autoconnect": "yes",
 }
-exit_host = hostname == "xeome-desktop"
+exit_host = host.data.get("exit_node")
 exit_now = exit_host and host.get_fact(Command, f"nmcli -g {','.join(EXIT_PROFILE)} connection show ws-exit 2>/dev/null || true")
 exit_units = []
 if exit_host and not exit_now:
@@ -263,7 +262,7 @@ stack = {
     "/etc/kernel/cmdline exists": bool(host.get_fact(File, "/etc/kernel/cmdline")),
     # || true: a fact command that exits non-zero aborts the whole deploy.
     "systemd-boot is installed": host.get_fact(Command, "bootctl is-installed 2>/dev/null || true") == "yes",
-    # A machine new to .chezmoidata.toml until tools/plymouth.py has drawn it.
+    # A machine new to data.py until tools/plymouth.py has drawn it.
     f"files/plymouth/watermark-{hostname}.png exists": pathlib.Path(f"files/plymouth/watermark-{hostname}.png").exists(),
 }
 if not all(stack.values()):
@@ -285,7 +284,7 @@ else:
     boot += [put(src, dest) for src, dest in initramfs.items()]
 
     cmdline = merge("\n".join(host.get_fact(FileContents, "/etc/kernel/cmdline")),
-                    owned(pathlib.Path("files/boot/cmdline").read_text()))
+                    owned(pathlib.Path("files/boot/cmdline").read_text()) + host.data.get("vt"))
     boot.append(files.put(name="/etc/kernel/cmdline", src=io.StringIO(cmdline), dest="/etc/kernel/cmdline",
                           user="root", group="root", mode="644"))
 

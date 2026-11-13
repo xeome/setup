@@ -1,2 +1,0 @@
-{{- /* "#rrggbbaa" or "#rrggbb" -> "#AARRGGBB", the order Qt reads. */ -}}
-#{{ upper (print (default "ff" (substr 7 9 .)) (substr 1 7 .)) }}

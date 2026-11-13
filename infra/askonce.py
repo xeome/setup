@@ -1,24 +1,27 @@
 """
-A yes/no question the deploy asks once per machine. The answer is kept in a
-file, so later deploys read it instead of asking. Delete the file to be asked
-again on the next deploy.
+A question the deploy asks once per machine: yes or no, or a line of text.
+The answer is kept in a file, so later deploys read it instead of asking.
+Delete the file to be asked again on the next deploy.
 
     python3 -I infra/askonce.py   # self-check
 """
 import pathlib
 
 
-def ask_once(path, question, tty="/dev/tty"):
-    """With no tty, opening it raises, so the deploy fails and chezmoi runs it
-    again on the next apply.
+def ask_once(path, question, tty="/dev/tty", text=False):
+    """With no tty, opening it raises, so the deploy fails and the next apply
+    asks again. So does an empty line where text is wanted.
     """
     path = pathlib.Path(path).expanduser()
     if path.exists():
         return path.read_text().strip()
     # Unbuffered binary: a tty is not seekable, which text-mode r+ requires.
     with open(tty, "r+b", buffering=0) as t:
-        t.write(f"{question} [y/N] ".encode())
-        answer = "yes" if t.readline().strip().lower() in (b"y", b"yes") else "no"
+        t.write(f"{question} ".encode() if text else f"{question} [y/N] ".encode())
+        line = t.readline().decode().strip()
+    if text and not line:
+        raise ValueError(f"no answer to: {question}")
+    answer = line if text else "yes" if line.lower() in ("y", "yes") else "no"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(answer)
     return answer
@@ -57,4 +60,19 @@ if __name__ == "__main__":
         else:
             raise AssertionError("ask_once returned with no tty")
         assert not pathlib.Path(tmp, "fresh/answer").exists()
+
+        for typed, want in (("Ada O'Löve\n", "Ada O'Löve"), ("\n", None)):
+            master, slave = os.openpty()
+            os.write(master, typed.encode())
+            try:
+                got = ask_once("~/text/name", "Your name for git commits?", tty=os.ttyname(slave), text=True)
+            except ValueError:
+                got = None
+            prompt = os.read(master, 4096)
+            os.close(master)
+            os.close(slave)
+            assert got == want, f"typed {typed!r}, got {got!r}"
+            assert b"[y/N]" not in prompt, prompt
+            assert pathlib.Path(tmp, "text/name").exists() == bool(want)
+            pathlib.Path(tmp, "text/name").unlink(missing_ok=True)
     print("askonce OK")

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Draws the splash images into infra/files/plymouth/. Run it by hand after adding
-a machine to .chezmoidata.toml, and commit the PNGs:
+a machine to infra/data.py, and commit the PNGs:
 
     python3 -I ~/.local/share/chezmoi/tools/plymouth.py
 
@@ -13,16 +13,16 @@ ponytail: drawn 1:1, plymouth doubles them on hidpi; draw @2x if a laptop's
 splash looks soft.
 """
 import pathlib
-import tomllib
+import runpy
 
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SRC = ROOT / "home"
 OUT = ROOT / "infra/files/plymouth"
-FONT = SRC / "dot_local/private_share/fonts/Doto[ROND,wght].ttf"
+FONT = ROOT / "home/.local/share/fonts/Doto[ROND,wght].ttf"
 
-DARK = tomllib.loads((SRC / ".chezmoidata/palette.toml").read_text())["palette"]["dark"]
+DATA = runpy.run_path(str(ROOT / "infra/data.py"))
+DARK = DATA["PALETTE"]["dark"]
 BRIGHT = (*bytes.fromhex(DARK["bright"][1:]), 255)
 UNLIT = (26, 26, 28, 255)      # Desk.qml's unlit dot
 SS = 4                         # supersampling
@@ -57,7 +57,7 @@ def progress(lit):
 
 
 if __name__ == "__main__":
-    hosts = tomllib.loads((SRC / ".chezmoidata.toml").read_text())["machines"]
+    hosts = DATA["MACHINES"]
     for host in hosts:
         watermark(host).save(OUT / f"watermark-{host}.png")
     for lit in range(DOTS + 1):

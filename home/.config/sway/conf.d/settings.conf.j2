@@ -1,0 +1,32 @@
+# Managed by dots.
+
+font pango:Inter SemiBold 8
+
+# Matched to hyprland's lua_modules/settings.lua.
+# 12 px between windows and to the screen edge: outer is added to inner at the
+# edge, so it stays 0.
+gaps inner 12
+gaps outer 0
+smart_borders off
+smart_gaps off
+default_border pixel 1
+default_floating_border none
+hide_edge_borders --i3 none
+workspace_layout default
+
+seat seat0 xcursor_theme Bibata-Modern-Classic 24
+
+# No `bar {}` block: quickshell draws the bar, and one here would stack a
+# second bar over it.
+
+# From `monitors` in infra/data.py. Directives for an unplugged output are
+# stored, so undocking is safe. Sway spells the same data with a `Hz` suffix
+# and a space-separated position.
+{% for mon in m.monitors -%}
+output {{ mon.output }} mode {{ mon.mode }}Hz pos {{ mon.position | replace("x", " ") }} scale {{ mon.scale }}
+{% for ws in mon.workspaces -%}
+workspace {{ ws }} output {{ mon.output }}
+{% endfor -%}
+{% endfor -%}
+output * adaptive_sync off
+output * subpixel rgb

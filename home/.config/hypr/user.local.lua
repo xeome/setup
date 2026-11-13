@@ -1,0 +1,2 @@
+-- Per-machine overrides, loaded last by hyprland.lua. Written once, when the
+-- file is missing, and never overwritten.

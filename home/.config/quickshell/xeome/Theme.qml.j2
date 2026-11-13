@@ -1,0 +1,96 @@
+pragma Singleton
+
+import QtQuick
+import Quickshell
+import Quickshell.Io
+
+// The colours come from PALETTE in infra/data.py, which says what each one is
+// for.
+Singleton {
+    id: root
+
+    // SUPER+T runs ~/.local/bin/theme-toggle, which flips GTK too and calls
+    // `qs -c xeome ipc call theme toggle`. Persisted across restarts.
+    property alias light: persisted.light
+
+    // Quickshell does not create stateDir; FileView needs it to exist.
+    Process {
+        command: ["mkdir", "-p", Quickshell.stateDir]
+        running: true
+    }
+
+    FileView {
+        path: `${Quickshell.stateDir}/theme.json`
+        watchChanges: true
+        onFileChanged: reload()
+        onAdapterUpdated: writeAdapter()
+        onLoadFailed: error => {
+            if (error === FileViewError.FileNotFound)
+                writeAdapter();
+        }
+
+        adapter: JsonAdapter {
+            id: persisted
+            property bool light: false
+        }
+    }
+
+    IpcHandler {
+        target: "theme"
+
+        function toggle(): bool {
+            root.light = !root.light;
+            return root.light;
+        }
+    }
+
+    // Colours are #AARRGGBB, Qt's order.
+    readonly property color ground: light ? "{{ qt(palette.light.ground) }}" : "{{ qt(palette.dark.ground) }}"
+    readonly property color panel: light ? "{{ qt(palette.light.panel) }}" : "{{ qt(palette.dark.panel) }}"
+    readonly property color raised: light ? "{{ qt(palette.light.raised) }}" : "{{ qt(palette.dark.raised) }}"
+    readonly property color rule: light ? "{{ qt(palette.light.rule) }}" : "{{ qt(palette.dark.rule) }}"
+    readonly property color text: light ? "{{ qt(palette.light.text) }}" : "{{ qt(palette.dark.text) }}"
+    readonly property color bright: light ? "{{ qt(palette.light.bright) }}" : "{{ qt(palette.dark.bright) }}"
+    readonly property color dim: light ? "{{ qt(palette.light.dim) }}" : "{{ qt(palette.dark.dim) }}"
+    readonly property color warm: light ? "{{ qt(palette.light.warm) }}" : "{{ qt(palette.dark.warm) }}"
+    readonly property color hot: light ? "{{ qt(palette.light.hot) }}" : "{{ qt(palette.dark.hot) }}"
+    readonly property color line: light ? "{{ qt(palette.light.line) }}" : "{{ qt(palette.dark.line) }}"
+    readonly property color ring: light ? "{{ qt(palette.light.ring) }}" : "{{ qt(palette.dark.ring) }}"
+    readonly property color lift: light ? "{{ qt(palette.light.lift) }}" : "{{ qt(palette.dark.lift) }}"
+    readonly property color card: light ? "{{ qt(palette.light.card) }}" : "{{ qt(palette.dark.card) }}"
+    readonly property color hover: light ? "{{ qt(palette.light.hover) }}" : "{{ qt(palette.dark.hover) }}"
+    readonly property color sel: light ? "{{ qt(palette.light.sel) }}" : "{{ qt(palette.dark.sel) }}"
+    readonly property color glow: light ? "{{ qt(palette.light.glow) }}" : "{{ qt(palette.dark.glow) }}"
+    readonly property color glowPanel: light ? "{{ qt(palette.light.glowPanel) }}" : "{{ qt(palette.dark.glowPanel) }}"
+    readonly property color glowPanelFar: light ? "{{ qt(palette.light.glowPanelFar) }}" : "{{ qt(palette.dark.glowPanelFar) }}"
+
+    readonly property int barHeight: 48
+    readonly property int gap: 6
+    readonly property int pad: 12
+    // Shell transitions: 200 ms, decelerating. Hyprland's `ease` curve in
+    // lua_modules/settings.lua is the same OutCubic, so windows move alike.
+    // The OSD's level bar and Shot's effects keep timings of their own.
+    readonly property int anim: 200
+    readonly property int ease: Easing.OutCubic
+
+    // Radius marks what you can interact with. Flat chrome — the bar itself,
+    // dividers, the bar's bottom edge — stays square, so a rounded corner in
+    // this shell always means "this responds to you".
+    readonly property int radius: 6
+    readonly property int radiusLg: 10
+
+    // "Inter Variable", not "Inter": that name resolves to the static
+    // Inter.ttc, where the wght axis does nothing and 450/550/650 collapse
+    // onto 500 and 700. One family only, since QML reads a comma list as one
+    // bogus name; the Nerd glyphs in labels come from fontconfig's fallback.
+    readonly property string family: "Inter Variable"
+
+    // Widens the space between a glyph and its value ("󰂰 35%"): Inter's space
+    // is narrow and the fallback glyphs narrower, so the two touched.
+    readonly property int glyphGap: 3
+    // Scaled per machine by TEXT_SCALE (hyprland.lua, from MACHINES in infra/data.py).
+    readonly property int size: Math.round(14 * (Number(Quickshell.env("TEXT_SCALE")) || 1))
+    // Every ordinary label inherits this; only 450 body, 650 headings and 700
+    // active are set locally.
+    readonly property int weight: 550
+}

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""python3 -I tools/zen-link.test.py — checks home/.chezmoiscripts/run_after_link-zen-chrome.sh."""
+"""python3 -I tools/zen-link.test.py — checks infra/scripts/link-zen-chrome.sh."""
 import os
 import pathlib
 import subprocess
 import tempfile
 
-SCRIPT = pathlib.Path(__file__).resolve().parents[1] / "home/.chezmoiscripts/run_after_link-zen-chrome.sh"
+SCRIPT = pathlib.Path(__file__).resolve().parents[1] / "infra/scripts/link-zen-chrome.sh"
 PREFS = (
     'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);',
     'user_pref("xpinstall.signatures.required", false);',

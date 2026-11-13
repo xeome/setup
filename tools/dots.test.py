@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
-"""python3 -I tools/dots.test.py — checks home/dot_config/exact_quickshell/executable_dots.py."""
+"""python3 -I tools/dots.test.py — checks home/.config/quickshell/dots.py."""
 import importlib.util
 import pathlib
+import runpy
 import sys
 
 import numpy as np
 from PIL import Image
 
-# The import would leave a __pycache__ in the chezmoi source, which deploys it.
+# The import would leave a __pycache__ in home/.
 sys.dont_write_bytecode = True
-spec = importlib.util.spec_from_file_location("dots", pathlib.Path(__file__).resolve().parents[1] / "home/dot_config/exact_quickshell/executable_dots.py")
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+spec = importlib.util.spec_from_file_location("dots", ROOT / "home/.config/quickshell/dots.py")
 dots = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(dots)
 
-HI = np.array([0xE6, 0xE7, 0xEA])  # the palette's dark text
+HI = np.array(list(bytes.fromhex(runpy.run_path(str(ROOT / "infra/data.py"))["PALETTE"]["dark"]["text"][1:])))
 
 
 def bake(rgb):

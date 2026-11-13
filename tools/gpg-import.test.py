@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""python3 -I tools/gpg-import.test.py — checks home/.chezmoiscripts/run_after_import-gpg-key.sh."""
+"""python3 -I tools/gpg-import.test.py — checks infra/scripts/import-gpg-key.sh."""
 import os
 import pathlib
 import subprocess
 import tempfile
 
-SCRIPT = pathlib.Path(__file__).resolve().parents[1] / "home/.chezmoiscripts/run_after_import-gpg-key.sh"
+SCRIPT = pathlib.Path(__file__).resolve().parents[1] / "infra/scripts/import-gpg-key.sh"
 MARKER = b"-----BEGIN PGP PRIVATE KEY BLOCK-----\nmarker\n"
 
 # age is the real one. Each stub reads its

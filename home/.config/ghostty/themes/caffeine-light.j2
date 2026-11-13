@@ -1,0 +1,16 @@
+# Caffeine's `variants.light`, the light half of the config's theme pair.
+#
+# Rendered from home/.config/ghostty/themes/caffeine-light.j2 in ~/.local/share/chezmoi.
+
+{% for c in ansi("light") -%}
+palette = {{ loop.index0 }}={{ c }}
+{% endfor %}
+background = {{ term.light.background }}
+foreground = {{ term.light.foreground }}
+
+cursor-color = {{ term.light.cursor }}
+cursor-text = {{ term.light.cursorText }}
+
+# The cursor colour as a 16% wash, flattened over the background.
+selection-background = {{ term.light.selection }}
+selection-foreground = {{ term.light.foreground }}

@@ -1,0 +1,29 @@
+#!/bin/bash
+# Writes qt5ct.conf, qt6ct.conf and Kvantum's kvantum.kvconfig from the GTK
+# gsettings. Every apply runs it, and theme-toggle after it flips them, so Qt
+# follows GTK from one place. Kvantum keeps nothing else in its file.
+set -euo pipefail
+bin=$(dirname "$0")
+
+# write <file> <command...>: the command's output, through a temp file, so a
+# command that fails never leaves <file> empty.
+write() {
+    local new old
+    # The x keeps the trailing newlines $( ) would strip.
+    new=$("${@:2}" && echo x)
+    old=$(cat "$1" 2>/dev/null; echo x)
+    [[ $new == "$old" ]] && return
+    mkdir -p "$(dirname "$1")"
+    printf %s "${new%x}" >"$1.tmp"
+    mv "$1.tmp" "$1"
+}
+
+for v in 5 6; do write ~/.config/qt${v}ct/qt${v}ct.conf python3 -I "$bin/qtct-conf" "$v"; done
+# Anything but an explicit light scheme is dark, as in infra/scripts/set-theme.sh,
+# since a fresh profile reports 'default'. graphite and graphiteDark are both
+# built by tools/kvantum.py.
+case "$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null)" in
+    *prefer-light*) theme=graphite ;;
+    *) theme=graphiteDark ;;
+esac
+write ~/.config/Kvantum/kvantum.kvconfig printf '[General]\ntheme=%s\n' "$theme"

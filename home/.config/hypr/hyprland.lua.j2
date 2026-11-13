@@ -1,0 +1,68 @@
+-- Per-machine values come from MACHINES[<hostname>] in infra/data.py; the
+-- shared config is in lua_modules/.
+
+-- Run a heavy app in its own scope. Otherwise it shares Hyprland's session
+-- scope, and systemd-oomd killing that cgroup takes the compositor down too.
+function app(cmd)
+  return "systemd-run --user --scope --quiet -- " .. cmd
+end
+
+hl.env("XDG_SESSION_TYPE", "wayland")
+hl.env("SDL_VIDEODRIVER", "wayland")
+hl.env("QT_QPA_PLATFORM", "wayland;xcb")
+hl.env("QT_AUTO_SCREEN_SCALE_FACTOR", "1")
+hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
+hl.env("SSH_AUTH_SOCK", "/run/user/{{ uid }}/rbw/ssh-agent-socket")
+hl.env("HYPRCURSOR_THEME", "Bibata-Modern-Classic")
+hl.env("HYPRCURSOR_SIZE", "24")
+hl.env("XCURSOR_THEME", "Bibata-Modern-Classic")
+hl.env("XCURSOR_SIZE", "24")
+hl.env("OBSIDIAN_USE_WAYLAND", "1")
+-- Read by quickshell's Theme.qml; see text_scale in infra/data.py.
+hl.env("TEXT_SCALE", "{{ m.text_scale }}")
+
+{%- for mon in m.monitors %}
+
+hl.monitor({ output = {{ mon.output | quote }}, mode = {{ mon.mode | quote }}, position = {{ mon.position | quote }}, scale = {{ mon.scale }} })
+{%- for ws in mon.workspaces %}
+hl.workspace_rule({ workspace = {{ ws | quote }}, monitor = {{ mon.output | quote }} })
+{%- endfor %}
+{%- endfor %}
+
+hl.config({
+  input = {
+    kb_layout = "tr",
+    numlock_by_default = true,
+    kb_options = "grp:win_space_toggle",
+    touchpad = {
+      disable_while_typing = true,
+      tap_to_click = true,
+      middle_button_emulation = true,
+    },
+  },
+})
+
+-- ponytail: device names are hardcoded, not per-machine; blocks for absent
+-- devices are ignored. The wireless dongle exposes two pointer interfaces.
+for _, name in ipairs({
+  "razer-razer-basilisk-v3-x-hyperspeed",
+  "razer-razer-basilisk-v3-x-hyperspeed-2",
+}) do
+  hl.device({
+    name = name,
+    natural_scroll = false,
+    accel_profile = "flat",
+    -- With the flat profile, speed is 1 + sensitivity: 1.4x.
+    sensitivity = 0.4,
+    scroll_factor = 0.8,
+  })
+end
+
+require("lua_modules.settings")
+require("lua_modules.keybinds")
+require("lua_modules.rules")
+require("lua_modules.startup")
+
+-- Absolute path: dofile() resolves against Hyprland's CWD, not this directory.
+
+pcall(dofile, os.getenv("HOME") .. "/.config/hypr/user.local.lua")
