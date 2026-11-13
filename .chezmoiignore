@@ -1,5 +1,0 @@
-# chezmoi reads source state from home/ (.chezmoiroot), so it never reads this file.
-# Only a `chezmoi update` that started before pulling the move to home/ reads the
-# repo root, and this keeps that one run from copying the repo into ~. Run
-# `chezmoi apply` after it. Delete this file once every machine has applied the move.
-*

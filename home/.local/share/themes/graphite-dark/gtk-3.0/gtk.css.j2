@@ -1,0 +1,109 @@
+/* graphite dark for GTK3: adw-gtk3-dark with graphite's colours on top.
+ * A theme folder rather than ~/.config/gtk-3.0/gtk.css because GTK reads the
+ * user stylesheet once at app start, while a gtk-theme switch (theme-toggle)
+ * restyles running apps. */
+@import url("file:///usr/share/themes/adw-gtk3-dark/gtk-3.0/gtk.css");
+
+{% with c = palette.dark %}{% include "gtk-colors.css" %}{% endwith %}
+/* graphite's corner glow and a card's lit top edge. */
+@define-color graphite_glow {{ rgba(palette.dark.glow) }};
+@define-color graphite_lift {{ rgba(palette.dark.lift) }};
+@define-color graphite_glow_panel_far {{ rgba(palette.dark.glowPanelFar) }};
+
+/* The accent is the text colour and adw-gtk3's switch knob is white, so an
+ * "on" switch would be a white knob on a near-white track. The knob takes the
+ * ground instead, as in gtk-4.0/gtk.css. The headerbar selectors out-rank
+ * adw-gtk3's unfocused-window knob; a disabled switch keeps its faded knob. */
+switch:checked:not(:disabled) slider,
+headerbar switch:backdrop:checked:not(:disabled) > slider,
+.titlebar switch:backdrop:checked:not(:disabled) > slider {
+  background-color: @accent_fg_color;
+}
+
+/* Thunar and other GTK3 apps that draw their own rows fill a selected row with
+ * theme_selected_bg_color (thunar-util.c), which adw-gtk3 aliases to the
+ * accent, under text in the window's text colour. The accent is the text
+ * colour, so the label would vanish. These use the colour adw-gtk3's own lists
+ * draw, a quarter of the accent over the view, opaque because those apps
+ * paint it without blending. */
+@define-color theme_selected_bg_color mix(@view_bg_color, @accent_bg_color, 0.25);
+@define-color theme_selected_fg_color @window_fg_color;
+@define-color theme_unfocused_selected_bg_color mix(@view_bg_color, @accent_bg_color, 0.25);
+@define-color theme_unfocused_selected_fg_color @window_fg_color;
+
+/* Every edge is two lines: the translucent line, then a dark ring outside it,
+ * without changing any control's size. A button's line is the 1px border
+ * adw-gtk3 already gives it, transparent: flat buttons (header bars, toolbars,
+ * .flat) reset its colour, and no state touches it. Its ring is a shadow,
+ * which adw-gtk3 drops while a button is hovered, pressed or checked. */
+button {
+  border-color: @borders;
+  box-shadow: 0 0 0 1px @shade_color;
+}
+
+entry,
+spinbutton:not(.vertical) {
+  box-shadow: inset 0 0 0 1px @borders, 0 0 0 1px @shade_color;
+}
+
+frame > border {
+  box-shadow: 0 0 0 1px @shade_color;
+}
+
+popover.background {
+  border-color: @borders;
+  box-shadow: 0 0 0 1px @shade_color;
+}
+
+/* Graphite's surface: a colourless glow from the window's top-left corner and
+ * a grain over the ground (grain.py bakes one tile per ground). Hyprland and
+ * sway give a GTK3 window no title bar unless the app sets its own, so the
+ * window ground starts at the corner; toolbars and sidebars, the ground's
+ * colour anyway, let it through. The tiles sit beside this file. */
+window.background {
+  background-image: url("grain-ground.png"),
+    radial-gradient(circle 360px at 0 0, @graphite_glow, alpha(@graphite_glow, 0));
+  background-repeat: repeat, no-repeat;
+}
+
+toolbar,
+toolbar:backdrop,
+.primary-toolbar,
+.primary-toolbar:backdrop,
+.toolbar,
+.toolbar:backdrop,
+.sidebar,
+.sidebar:backdrop {
+  background-color: transparent;
+}
+
+headerbar,
+headerbar:backdrop {
+  background-image: url("grain-ground.png");
+}
+
+/* Views are graphite's inset panel: two glows, the ground's top-left and a
+ * fainter one top-right, as in the shell's Surface.qml. Tree and icon views paint
+ * the whole view once, then every cell again with the same style plus a
+ * `cell` class (gtktreeview.c, gtkiconview.c), so cells drop the images:
+ * each would draw its own glow from its own corner. */
+.view,
+iconview,
+textview text {
+  background-image: url("grain-panel.png"),
+    radial-gradient(circle 360px at 0 0, @graphite_glow, alpha(@graphite_glow, 0)),
+    radial-gradient(circle 300px at 100% 0, @graphite_glow_panel_far, alpha(@graphite_glow_panel_far, 0));
+  background-repeat: repeat, no-repeat, no-repeat;
+}
+
+.view.cell,
+iconview.cell {
+  background-image: none;
+}
+
+/* Cells are painted over the view, and opaque ones would hide its glow and
+ * grain, so only a selected cell keeps a fill. */
+.view.cell:not(:selected),
+iconview.cell:not(:selected) {
+  background-color: transparent;
+}

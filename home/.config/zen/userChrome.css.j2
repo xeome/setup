@@ -1,0 +1,50 @@
+/* graphite for Zen. infra/scripts/link-zen-chrome.sh links this into every Zen
+ * profile's chrome/ folder.
+ *
+ * Only theme variables, no layout selectors: Zen updates break layout
+ * selectors, while a renamed variable only stops one colour applying.
+ * light-dark() follows theme-toggle, because the same script sets
+ * zen.view.window.scheme to Auto. A user sheet ranks below Zen's own styles, so every
+ * value is !important. */
+
+:root {
+  /* Zen mixes its whole palette from these two: the primary colour and the
+   * branding ground. Zen's JS sets the primary inline from the accent pref
+   * (zenThemeModifier.js), so the !important also beats that. Graphite has no
+   * brand accent: the "accent" is the text tone. */
+  --zen-primary-color: light-dark({{ palette.light.text }}, {{ palette.dark.text }}) !important;
+  --zen-branding-dark: {{ palette.dark.ground }} !important;
+  --zen-branding-paper: {{ palette.light.ground }} !important;
+
+  --zen-colors-tertiary: light-dark({{ palette.light.ground }}, {{ palette.dark.ground }}) !important;
+  --zen-colors-border: light-dark({{ rgba(palette.light.line) }}, {{ rgba(palette.dark.line) }}) !important;
+  --zen-colors-input-bg: light-dark({{ rgba(palette.light.card) }}, {{ rgba(palette.dark.card) }}) !important;
+
+  /* Popovers, menus and the floating URL bar are graphite's raised surface. */
+  --zen-dialog-background: light-dark({{ palette.light.raised }}, {{ palette.dark.raised }}) !important;
+  --arrowpanel-background: light-dark({{ palette.light.raised }}, {{ palette.dark.raised }}) !important;
+  --zen-urlbar-background: light-dark({{ palette.light.raised }}, {{ palette.dark.raised }}) !important;
+  --panel-separator-color: light-dark({{ rgba(palette.light.line) }}, {{ rgba(palette.dark.line) }}) !important;
+  /* The Better Find Bar mod fills the find bar with --zen-primary-color, which
+   * is the text tone here, so its labels vanished. */
+  --better-findbar-background-color: light-dark({{ palette.light.raised }}, {{ palette.dark.raised }}) !important;
+
+  --toolbarbutton-background-color-hover: light-dark({{ rgba(palette.light.hover) }}, {{ rgba(palette.dark.hover) }}) !important;
+  --toolbarbutton-background-color-active: light-dark({{ rgba(palette.light.sel) }}, {{ rgba(palette.dark.sel) }}) !important;
+}
+
+/* The ground. Zen's theme picker writes its workspace gradient inline on these
+ * two elements (ZenGradientGenerator.mjs), so they are named directly. Private
+ * windows keep Zen's own darker ground, because it marks the window as private. */
+:root:not([zen-private-window="true"]) :is(#zen-browser-background, #zen-toolbar-background),
+:root:not([zen-private-window="true"]) {
+  --zen-main-browser-background: light-dark({{ palette.light.ground }}, {{ palette.dark.ground }}) !important;
+  --zen-main-browser-background-toolbar: light-dark({{ palette.light.ground }}, {{ palette.dark.ground }}) !important;
+  --zen-themed-toolbar-bg-transparent: light-dark({{ palette.light.ground }}, {{ palette.dark.ground }}) !important;
+}
+
+/* Zen sets these on the tab strip, below :root, so they are set on the tab. */
+.tabbrowser-tab {
+  --tab-background-color-selected: light-dark({{ rgba(palette.light.sel) }}, {{ rgba(palette.dark.sel) }}) !important;
+  --tab-background-color-hover: light-dark({{ rgba(palette.light.hover) }}, {{ rgba(palette.dark.hover) }}) !important;
+}

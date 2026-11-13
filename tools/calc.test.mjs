@@ -1,6 +1,6 @@
-// node tools/calc.test.mjs — checks home/dot_config/exact_quickshell/exact_xeome/Calc.mjs.
+// node tools/calc.test.mjs — checks home/.config/quickshell/xeome/Calc.mjs.
 import assert from "node:assert/strict";
-import { crop, cpuBusy, isoWeek, greeting, dotsName, isDots, sourceOf } from "../home/dot_config/exact_quickshell/exact_xeome/Calc.mjs";
+import { crop, cpuBusy, isoWeek, greeting, dotsName, isDots, sourceOf } from "../home/.config/quickshell/xeome/Calc.mjs";
 
 const rect = (x, y, width, height) => ({ x, y, width, height });
 

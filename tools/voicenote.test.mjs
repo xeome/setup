@@ -1,10 +1,10 @@
-// node tools/voicenote.test.mjs — checks home/dot_config/zen/voicenote's manifest, hook.js, wav.js,
+// node tools/voicenote.test.mjs — checks home/.config/zen/voicenote's manifest, hook.js, wav.js,
 // background.js and island.js.
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const DIR = new URL("../home/dot_config/zen/voicenote/", import.meta.url);
+const DIR = new URL("../home/.config/zen/voicenote/", import.meta.url);
 const read = name => readFileSync(new URL(name, DIR), "utf8");
 const settle = () => new Promise(r => setImmediate(r));
 const noTimer = () => { throw new Error("the island armed a timer"); };
@@ -389,9 +389,9 @@ for (const reply of [{ text: "kısa", seconds: 2 }, { text: "kısa" }]) {
     const manifest = JSON.parse(read("manifest.json"));
     assert.ok(manifest.permissions.includes("storage"), "the manifest asks for no storage permission");
     assert.equal(manifest.browser_action?.default_area, "navbar", "the button would land in the extensions panel");
-    // chezmoi deploys icon.svg.tmpl as icon.svg.
+    // An apply renders icon.svg.j2 as icon.svg.
     const icon = manifest.browser_action.default_icon;
-    assert.ok(existsSync(new URL(icon, DIR)) || existsSync(new URL(icon + ".tmpl", DIR)), "the button's icon is missing");
+    assert.ok(existsSync(new URL(icon, DIR)) || existsSync(new URL(icon + ".j2", DIR)), "the button's icon is missing");
 }
 
 {

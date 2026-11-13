@@ -1,0 +1,63 @@
+#!/bin/bash
+# Zen only reads a profile's own folder, and profile folders have random
+# names, so home/ can't hold these files at their real paths. Runs on every
+# apply, so a profile created later is covered by the next one.
+# tools/zen-link.test.py checks it.
+set -euo pipefail
+
+ZEN="$HOME/.zen"
+HOMETAB="$HOME/.config/zen/hometab"
+VOICENOTE="$HOME/.config/zen/voicenote"
+[[ -f "$ZEN/profiles.ini" ]] || exit 0
+# infra/deploy.py asks once per machine whether to install whisper for voicenote.
+voicenote=$(cat "$HOME/.local/state/dots/voicenote" 2>/dev/null || true)
+
+# userChrome.css is off by default since Zen 1.x. The hometab is unsigned;
+# Zen's build lets the pref turn the check off (MOZ_REQUIRE_SIGNING is false).
+# Without replace-newtab false, Ctrl+T opens only the URL bar. Scheme 2 is
+# Auto, so Zen follows theme-toggle; 0 and 1 pin it dark or light.
+PREFS=(
+    'user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);'
+    'user_pref("xpinstall.signatures.required", false);'
+    'user_pref("zen.urlbar.replace-newtab", false);'
+    'user_pref("zen.view.window.scheme", 2);'
+)
+
+proxy() {
+    [[ "$(cat "$1" 2>/dev/null)" == "$2" ]] && return
+    mkdir -p "$(dirname "$1")"
+    echo "$2" > "$1"
+}
+
+sed -n 's/^Path=//p' "$ZEN/profiles.ini" | while IFS= read -r path; do
+    # Relative paths are the default; an absolute one (IsRelative=0) is kept.
+    [[ "$path" == /* ]] && profile="$path" || profile="$ZEN/$path"
+    [[ -d "$profile" ]] || continue
+
+    css="$profile/chrome/userChrome.css"
+    # Never replace a stylesheet someone wrote by hand.
+    if [[ -e "$css" && ! -L "$css" ]]; then
+        echo "zen: left $css alone (not a link)" >&2
+    else
+        mkdir -p "$profile/chrome"
+        ln -sfn "$HOME/.config/zen/userChrome.css" "$css"
+    fi
+
+    # A proxy file: Firefox loads the extension unpacked from the folder it
+    # names. Zen installs it disabled and asks once.
+    proxy "$profile/extensions/hometab@xeome" "$HOMETAB"
+    # No answer file means the next deploy asks again. Until it does, the
+    # extension stays as it is.
+    case "$voicenote" in
+        yes) proxy "$profile/extensions/voicenote@xeome" "$VOICENOTE" ;;
+        no) rm -f "$profile/extensions/voicenote@xeome" ;;
+    esac
+
+    js="$profile/user.js"
+    for pref in "${PREFS[@]}"; do
+        grep -qxF "$pref" "$js" 2>/dev/null && continue
+        # A hand-written user.js may not end in a newline; don't glue onto its last line.
+        [[ -s "$js" && -n "$(tail -c1 "$js")" ]] && echo >> "$js"
+        echo "$pref" >> "$js"
+    done
+done

@@ -1,0 +1,162 @@
+/**
+ * @name graphite
+ * @description graphite-ui's tokens on Discord's own colour variables
+ * @author xeome
+ * @version 1.0.0
+ */
+
+/* Discord's design tokens, not its class names, which Discord hashes and
+ * reshuffles. A renamed token falls back to Discord's own dark colour instead
+ * of breaking the layout. The token list and the selector follow
+ * midnight-discord (refact0r): its changelog says when Discord renames one.
+ *
+ * Dark only: Discord picks its theme itself rather than following the desktop. */
+
+body,
+.theme-dark:not(.custom-user-profile-theme) {
+    --font-primary: 'Inter', sans-serif;
+    --font-display: 'Inter', sans-serif;
+    --font-headline: 'Inter', sans-serif;
+
+    /* Grounds: the server and channel lists are the ground, the chat is the
+     * inset panel, popouts and modals are raised. Discord paints the chat
+     * with base-lower (.chatContent), not chat-background-default. */
+    --app-frame-background: {{ palette.dark.ground }};
+    --background-base-lowest: {{ palette.dark.ground }};
+    --background-base-lower: {{ palette.dark.panel }};
+    --background-base-low: {{ palette.dark.ground }};
+    --background-secondary-alt: {{ palette.dark.ground }};
+    --home-background: {{ palette.dark.ground }};
+    --chat-background-default: {{ palette.dark.panel }};
+    --background-surface-high: {{ palette.dark.raised }};
+    --background-surface-higher: {{ palette.dark.raised }};
+    --background-surface-highest: {{ palette.dark.raised }};
+    --bg-surface-raised: {{ palette.dark.raised }};
+    --modal-background: {{ palette.dark.raised }};
+    --modal-footer-background: {{ palette.dark.raised }};
+    --card-background-default: {{ palette.dark.raised }};
+    --background-code: {{ palette.dark.raised }};
+    --channeltextarea-background: {{ palette.dark.raised }};
+    --input-background-default: {{ rgba(palette.dark.card) }};
+
+    /* Glow and grain, through the variables Discord paints its Nitro gradient
+     * themes with: app-frame is the title bar and the app behind the server
+     * list, high is the channel and DM sidebar, chat is the chat, its header
+     * and the member list. The other gradient variables are left unset,
+     * because Discord also reads them for hover states and inputs.
+     *
+     * Every layer is `fixed`, so all surfaces of one ground share one light
+     * field and one grain, with no seam where two elements meet. The ground
+     * is lit from the window's top-left corner. The panel is lit from its own
+     * top-left, which is where the sidebar ends, and from the window's
+     * top-right. Discord's sidebar width variable ignores a drag-resized
+     * sidebar, which moves that glow by the drag distance and nothing else.
+     *
+     * Grain is grain.py's tile per ground: Chromium has blend modes, but a
+     * variable only reaches the `background` shorthand, which has no blend
+     * mode, so overlay is baked into a normal-blend tile as Quickshell does. */
+    --background-gradient-app-frame:
+        url(data:image/png;base64,{{ b64("home/.config/quickshell/xeome/grain-ground.png") }}) fixed,
+        radial-gradient(600px 300px at 0 0, {{ rgba(palette.dark.glow) }}, transparent 75%) fixed,
+        {{ palette.dark.ground }};
+    --background-gradient-high: var(--background-gradient-app-frame);
+    --background-gradient-chat:
+        url(data:image/png;base64,{{ b64("infra/templates/grain-panel.png") }}) fixed,
+        radial-gradient(480px 250px at var(--custom-app-sidebar-target-width, 340px) var(--custom-app-top-bar-height, 32px), rgba(255, 255, 255, 0.065), transparent 75%) fixed,
+        radial-gradient(400px 200px at 100% 0, {{ rgba(palette.dark.glowPanelFar) }}, transparent 75%) fixed,
+        {{ palette.dark.panel }};
+
+    /* Translucent states: hover, selection, the faint message hover. */
+    --background-mod-subtle: {{ rgba(palette.dark.hover) }};
+    --background-mod-muted: {{ rgba(palette.dark.hover) }};
+    --background-mod-normal: {{ rgba(palette.dark.sel) }};
+    --interactive-background-hover: {{ rgba(palette.dark.hover) }};
+    --interactive-background-active: {{ rgba(palette.dark.sel) }};
+    --interactive-background-selected: {{ rgba(palette.dark.sel) }};
+    --message-background-hover: {{ rgba(palette.dark.card) }};
+    --mention-background: {{ rgba(palette.dark.sel) }};
+
+    /* Edges: the translucent line. Focus is graphite's one non-status colour. */
+    --app-frame-border: {{ rgba(palette.dark.line) }};
+    --border-subtle: {{ rgba(palette.dark.line) }};
+    --border-normal: {{ rgba(palette.dark.line) }};
+    --input-border-default: {{ rgba(palette.dark.line) }};
+    --input-border-active: {{ palette.dark.warm }};
+    --border-focus: {{ palette.dark.warm }};
+    --scrollbar-auto-thumb: {{ palette.dark.rule }};
+    --scrollbar-thin-thumb: {{ palette.dark.rule }};
+    --scrollbar-auto-track: transparent;
+    --scrollbar-thin-track: transparent;
+
+    /* Text: two tones carry hierarchy, bright for names, dim for labels. */
+    --text-default: {{ palette.dark.text }};
+    --text-strong: {{ palette.dark.bright }};
+    --text-muted: {{ palette.dark.dim }};
+    --text-subtle: {{ palette.dark.dim }};
+    --channels-default: {{ palette.dark.dim }};
+    --channel-icon: {{ palette.dark.dim }};
+    --interactive-text-default: {{ palette.dark.dim }};
+    --interactive-text-hover: {{ palette.dark.text }};
+    --interactive-text-active: {{ palette.dark.bright }};
+    --interactive-icon-default: {{ palette.dark.dim }};
+    --interactive-icon-hover: {{ palette.dark.text }};
+    --interactive-icon-active: {{ palette.dark.bright }};
+    --icon-default: {{ palette.dark.dim }};
+    --icon-subtle: {{ palette.dark.dim }};
+    --icon-strong: {{ palette.dark.text }};
+    --mention-foreground: {{ palette.dark.bright }};
+    --text-brand: {{ palette.dark.text }};
+    /* A link is something you can act on, so it keeps a colour: the terminal blue. */
+    --text-link: {{ term.dark.normal.blue }};
+
+    /* No brand accent: primary controls are the text tone inverted, the way
+     * GTK and Quickshell draw their accent. */
+    --control-primary-background-default: {{ palette.dark.text }};
+    --control-primary-background-hover: {{ palette.dark.bright }};
+    --control-primary-background-active: {{ palette.dark.bright }};
+    --control-primary-text-default: {{ palette.dark.ground }};
+    --control-primary-text-hover: {{ palette.dark.ground }};
+    --control-primary-text-active: {{ palette.dark.ground }};
+    --control-primary-icon-default: {{ palette.dark.ground }};
+    --control-primary-icon-hover: {{ palette.dark.ground }};
+    --control-primary-icon-active: {{ palette.dark.ground }};
+    --control-primary-border-default: {{ rgba(palette.dark.line) }};
+    --control-primary-border-hover: {{ rgba(palette.dark.line) }};
+    --control-primary-border-active: {{ rgba(palette.dark.line) }};
+    --control-secondary-background-default: {{ rgba(palette.dark.sel) }};
+    --control-secondary-background-hover: rgba(255, 255, 255, 0.1);
+    --control-secondary-background-active: rgba(255, 255, 255, 0.1);
+    --control-secondary-text-default: {{ palette.dark.text }};
+    --control-secondary-text-hover: {{ palette.dark.bright }};
+    --control-secondary-text-active: {{ palette.dark.bright }};
+    --control-secondary-border-default: {{ rgba(palette.dark.line) }};
+    --control-secondary-border-hover: {{ rgba(palette.dark.line) }};
+    --control-secondary-border-active: {{ rgba(palette.dark.line) }};
+    --switch-background-selected-default: {{ palette.dark.text }};
+    --switch-background-selected-hover: {{ palette.dark.bright }};
+    --switch-thumb-background-selected-default: {{ palette.dark.ground }};
+    --checkbox-background-selected-default: {{ palette.dark.text }};
+    --checkbox-background-selected-hover: {{ palette.dark.bright }};
+    --checkbox-icon-active: {{ palette.dark.ground }};
+    --radio-background-selected-default: {{ palette.dark.text }};
+    --radio-background-selected-hover: {{ palette.dark.bright }};
+    --radio-thumb-background-active: {{ palette.dark.ground }};
+    /* Discord's brand colour sits under white text (the new-messages bar, role
+     * checkmarks) as often as on the ground (progress bars, active outlines).
+     * Graphite's light-mode dim reads both ways: white on it is 5.7:1, and it
+     * is 3.4:1 on the ground. */
+    --brand-500: {{ palette.light.dim }};
+    --blurple-50: {{ palette.light.dim }};
+}
+
+/* Discord paints the member and DM list scrollers, every member row and image
+ * placeholders with the same variable as the surface under them. Under a
+ * `fixed` background, Chromium then repaints the whole list on every scroll
+ * frame and drops frames. Emptying the variable there draws the same pixels
+ * once. Class prefixes, because Discord changes the hash after the _. */
+[class*="membersWrap_"],
+[class*="privateChannels_"] > *,
+[class*="imagePlaceholder_"] {
+    --background-gradient-chat: transparent;
+    --background-gradient-high: transparent;
+}

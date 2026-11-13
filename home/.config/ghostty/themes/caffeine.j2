@@ -1,0 +1,25 @@
+# Caffeine — https://github.com/crynta/terax-ai src/modules/theme/themes/caffeine.ts
+#
+# Rendered from home/.config/ghostty/themes/caffeine.j2 in ~/.local/share/chezmoi.
+#
+# Colours only, like ghostty's built-in themes; everything else stays in the
+# config. The hues are TERMINAL in infra/data.py, which alacritty's
+# caffeine.toml and foot.ini read too.
+
+# Slot 0 is `rule`, not a true black, because the background is already
+# near-black.
+{%- for c in ansi("dark") %}
+palette = {{ loop.index0 }}={{ c }}
+{%- endfor %}
+
+background = {{ palette.dark.panel }}
+foreground = {{ palette.dark.text }}
+
+# A bright block with the panel showing through the glyph.
+cursor-color = {{ palette.dark.bright }}
+cursor-text = {{ palette.dark.panel }}
+
+# Selected text is inverted, text on ground, as vicinae selects it: a `sel`
+# wash is too faint to show a range in a terminal.
+selection-background = {{ palette.dark.text }}
+selection-foreground = {{ palette.dark.ground }}

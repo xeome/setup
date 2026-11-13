@@ -1,0 +1,15 @@
+#!/bin/bash
+# configure-fonts.sh <text scale>
+#
+# GTK reads its fonts from gsettings, not from fontconfig, so the faces
+# fonts.conf aliases to (Inter, JetBrains Mono) have to be named here
+# too. Size stays at 11pt; text_scale (see infra/data.py) carries text
+# past the critical print size on machines where monitor scale can't.
+set -euo pipefail
+
+gsettings set org.gnome.desktop.interface font-name 'Inter 11'
+gsettings set org.gnome.desktop.interface document-font-name 'Inter 11'
+gsettings set org.gnome.desktop.interface monospace-font-name 'JetBrainsMono Nerd Font Medium 10'
+gsettings set org.gnome.desktop.interface font-antialiasing 'grayscale'
+gsettings set org.gnome.desktop.interface font-hinting 'slight'
+gsettings set org.gnome.desktop.interface text-scaling-factor "$1"

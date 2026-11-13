@@ -1,2 +1,0 @@
--- Per-machine overrides, loaded last by hyprland.lua. chezmoi creates this
--- file once (create_ prefix) and never overwrites it.

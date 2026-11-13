@@ -1,0 +1,181 @@
+#:schema https://yazi-rs.github.io/schemas/theme.json
+#
+# Graphite. File types, permissions and markers keep the terminal ANSI hues;
+# chrome is neutral, focus is warm.
+#
+# Schema is yazi >= 25.5 ([mgr], not [manager]; perm_*, not permissions_*).
+# yazi rejects a theme on the older schema and falls back to its stock one.
+
+[mgr]
+cwd = { fg = "{{ palette.dark.bright }}", bold = true }
+
+find_keyword  = { fg = "{{ palette.dark.warm }}", bold = true, italic = true, underline = true }
+find_position = { fg = "{{ term.dark.normal.magenta }}", bg = "reset", bold = true, italic = true }
+
+symlink_target = { italic = true }
+
+marker_copied   = { fg = "{{ term.dark.normal.green }}", bg = "{{ term.dark.normal.green }}" }
+marker_cut      = { fg = "{{ palette.dark.hot }}", bg = "{{ palette.dark.hot }}" }
+marker_marked   = { fg = "{{ term.dark.normal.cyan }}", bg = "{{ term.dark.normal.cyan }}" }
+marker_selected = { fg = "{{ term.dark.normal.yellow }}", bg = "{{ term.dark.normal.yellow }}" }
+marker_symbol   = "│"
+
+# Counts are chips: an ANSI fill carrying ground-coloured text.
+count_copied   = { fg = "{{ palette.dark.ground }}", bg = "{{ term.dark.normal.green }}" }
+count_cut      = { fg = "{{ palette.dark.ground }}", bg = "{{ palette.dark.hot }}" }
+count_selected = { fg = "{{ palette.dark.ground }}", bg = "{{ term.dark.normal.yellow }}" }
+
+border_symbol = "│"
+border_style  = { fg = "{{ palette.dark.rule }}" }
+
+syntect_theme = ""
+
+
+
+[tabs]
+active   = { fg = "{{ palette.dark.bright }}", bg = "{{ palette.dark.rule }}", bold = true }
+inactive = { fg = "{{ palette.dark.dim }}", bg = "{{ palette.dark.raised }}" }
+
+sep_inner = { open = "", close = "" }
+sep_outer = { open = "", close = "" }
+
+
+
+# Three modes, three meanings: neutral for normal, warm (graphite's focus
+# colour) for select, hot for unset.
+[mode]
+normal_main = { fg = "{{ palette.dark.ground }}", bg = "{{ palette.dark.text }}", bold = true }
+normal_alt  = { fg = "{{ palette.dark.text }}", bg = "{{ palette.dark.rule }}" }
+
+select_main = { fg = "{{ palette.dark.ground }}", bg = "{{ palette.dark.warm }}", bold = true }
+select_alt  = { fg = "{{ palette.dark.warm }}", bg = "{{ palette.dark.rule }}" }
+
+unset_main = { fg = "{{ palette.dark.ground }}", bg = "{{ palette.dark.hot }}", bold = true }
+unset_alt  = { fg = "{{ palette.dark.hot }}", bg = "{{ palette.dark.rule }}" }
+
+
+
+[indicator]
+parent  = { reversed = true }
+current = { reversed = true }
+preview = { underline = true }
+padding = { open = "", close = "" }
+
+
+
+[status]
+overall   = {}
+sep_left  = { open = "", close = "" }
+sep_right = { open = "", close = "" }
+
+# Permission bits, from the terminal ANSI ramp.
+perm_sep   = { fg = "{{ palette.dark.dim }}" }
+perm_type  = { fg = "{{ term.dark.normal.green }}" }
+perm_read  = { fg = "{{ term.dark.normal.yellow }}" }
+perm_write = { fg = "{{ palette.dark.hot }}" }
+perm_exec  = { fg = "{{ term.dark.normal.cyan }}" }
+
+progress_label  = { fg = "{{ palette.dark.text }}", bold = true }
+progress_normal = { fg = "{{ palette.dark.text }}", bg = "{{ palette.dark.rule }}" }
+progress_error  = { fg = "{{ palette.dark.hot }}", bg = "{{ palette.dark.rule }}" }
+
+
+
+[which]
+border          = { fg = "{{ palette.dark.dim }}" }
+cols            = 3
+mask            = { bg = "{{ palette.dark.raised }}" }
+cand            = { fg = "{{ palette.dark.bright }}" }
+rest            = { fg = "{{ palette.dark.dim }}" }
+desc            = { fg = "{{ term.dark.normal.magenta }}" }
+separator       = "  "
+separator_style = { fg = "{{ palette.dark.rule }}" }
+
+
+
+[confirm]
+border     = { fg = "{{ palette.dark.dim }}" }
+title      = { fg = "{{ palette.dark.bright }}" }
+body       = {}
+list       = {}
+btn_yes    = { fg = "{{ palette.dark.ground }}", bg = "{{ palette.dark.text }}" }
+btn_no     = {}
+btn_labels = [ "  [Y]es  ", "  (N)o  " ]
+
+
+
+[spot]
+border = { fg = "{{ palette.dark.dim }}" }
+title  = { fg = "{{ palette.dark.bright }}" }
+
+tbl_col  = { fg = "{{ palette.dark.bright }}" }
+tbl_cell = { fg = "{{ palette.dark.bright }}", bg = "{{ palette.dark.rule }}" }
+
+
+
+[notify]
+title_info  = { fg = "{{ term.dark.normal.green }}" }
+title_warn  = { fg = "{{ term.dark.normal.yellow }}" }
+title_error = { fg = "{{ palette.dark.hot }}" }
+
+icon_info  = ""
+icon_warn  = ""
+icon_error = ""
+
+
+
+[pick]
+border   = { fg = "{{ palette.dark.dim }}" }
+active   = { fg = "{{ term.dark.normal.magenta }}", bold = true }
+inactive = {}
+
+
+
+[input]
+border   = { fg = "{{ palette.dark.dim }}" }
+title    = {}
+value    = {}
+selected = { reversed = true }
+
+
+
+[cmp]
+border   = { fg = "{{ palette.dark.dim }}" }
+active   = { fg = "{{ palette.dark.bright }}", bg = "{{ palette.dark.rule }}" }
+inactive = {}
+
+icon_file    = ""
+icon_folder  = ""
+icon_command = ""
+
+
+
+[tasks]
+border  = { fg = "{{ palette.dark.dim }}" }
+title   = {}
+hovered = { fg = "{{ term.dark.normal.magenta }}", bold = true }
+
+
+
+[help]
+border  = { fg = "{{ palette.dark.dim }}" }
+chord   = { fg = "{{ term.dark.normal.yellow }}" }
+action  = {}
+hovered = { fg = "{{ palette.dark.bright }}", bg = "{{ palette.dark.rule }}", bold = true }
+
+
+
+[filetype]
+rules = [
+	{ mime = "**/image/*", fg = "{{ term.dark.normal.cyan }}" },
+	{ mime = "**/{audio,video}/*", fg = "{{ term.dark.normal.magenta }}" },
+	{ mime = "**/application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", fg = "{{ term.dark.normal.yellow }}" },
+	{ mime = "**/application/{pdf,doc,rtf}", fg = "{{ term.dark.normal.red }}" },
+	{ mime = "vfs/{absent,stale}", fg = "{{ palette.dark.dim }}" },
+	{ url = "*", is = "orphan", bg = "{{ palette.dark.hot }}" },
+	{ url = "*", is = "exec"  , fg = "{{ term.dark.normal.green }}" },
+	{ url = "*", is = "dummy", bg = "{{ palette.dark.hot }}" },
+	{ url = "*/", is = "dummy", bg = "{{ palette.dark.hot }}" },
+	{ url = "*/", fg = "{{ term.dark.normal.blue }}" },
+]
+

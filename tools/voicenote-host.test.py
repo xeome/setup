@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""python3 -I tools/voicenote-host.test.py — checks home/dot_local/bin/executable_voicenote-host
+"""python3 -I tools/voicenote-host.test.py — checks home/.local/bin/voicenote-host
 against a stub whisper-cli on PATH, speaking Firefox's native messaging framing."""
 import base64
 import hashlib
@@ -13,7 +13,7 @@ import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-HOST = ROOT / "home/dot_local/bin/executable_voicenote-host"
+HOST = ROOT / "home/.local/bin/voicenote-host"
 # deploy.py downloads the models to these paths, and the host must load them from there.
 MODEL = re.search(r'^WHISPER_MODEL = "([^"]+)"', (ROOT / "infra/deploy.py").read_text(), re.M)[1]
 host_model = re.search(r'^MODEL = "([^"]+)"', HOST.read_text(), re.M)[1]

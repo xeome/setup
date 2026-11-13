@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Builds graphite's Kvantum theme, the Qt side of the GTK themes, from
 KvLibadwaita: libadwaita's shapes, so Qt and GTK apps match, recoloured to
-home/.chezmoidata/palette.toml and given graphite's two-line edges, corner
-glow and grain.
+PALETTE in infra/data.py and given graphite's two-line edges, corner glow
+and grain.
 
-Generated, not committed: chezmoi runs this on apply whenever the palette,
-this file or the grain tile changes (home/.chezmoiscripts/run_onchange_after_build-kvantum.sh.tmpl).
+Generated, not committed: infra/apply.py runs this whenever the palette, this
+file or the grain tile changes.
 
     kvantum.py [OUTDIR]     default ~/.config/Kvantum/graphite
 
@@ -16,17 +16,17 @@ upstream, so the pin below is the version every colour in TABLE was read from.
 import base64
 import pathlib
 import re
+import runpy
 import subprocess
 import sys
-import tomllib
 import xml.etree.ElementTree as ET
 
 REPO = "https://github.com/GabePoel/KvLibadwaita.git"
 PIN = "1f4e0bec44b13dabfa1fe4047aa8eeaccf2f3557"
 CACHE = pathlib.Path.home() / ".cache/kvlibadwaita-src"
-HOME = pathlib.Path(__file__).resolve().parents[1] / "home"
-PALETTE = HOME / ".chezmoidata/palette.toml"
-GRAIN = HOME / "dot_config/exact_quickshell/exact_xeome/grain-ground.png"
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+PALETTE = runpy.run_path(str(ROOT / "infra/data.py"))["PALETTE"]
+GRAIN = ROOT / "home/.config/quickshell/xeome/grain-ground.png"
 
 SVG_NS = "http://www.w3.org/2000/svg"
 XLINK = "{http://www.w3.org/1999/xlink}href"
@@ -62,9 +62,8 @@ def fetch():
 
 def tokens(mode):
     """{name: (#rrggbb, alpha)} from the palette, which writes #rrggbb[aa]."""
-    palette = tomllib.loads(PALETTE.read_text())["palette"][mode]
     return {name: (h[:7], round(int(h[7:] or "ff", 16) / 255, 3))
-            for name, h in palette.items() if isinstance(h, str)}
+            for name, h in PALETTE[mode].items() if isinstance(h, str)}
 
 
 def style_of(e):
@@ -319,7 +318,7 @@ SECTIONS = {
 # The fixed-size glow: Kvantum draws the window interior at least this big
 # and cuts it at the window's right and bottom (Theme-Config, min_width under
 # Window), so a glow at its top-left keeps its size. 4096 exceeds every
-# monitor in .chezmoidata.toml; a bigger window would stretch it.
+# monitor in infra/data.py; a bigger window would stretch it.
 GLOW_CANVAS = 4096
 GLOW_RADIUS = 360  # Surface.qml's glowSize 480 * 0.75
 GRAIN_TILE = 160

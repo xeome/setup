@@ -28,17 +28,22 @@ def merge(current, tokens):
 
 if __name__ == "__main__":
     import pathlib
+    import runpy
 
-    tokens = owned((pathlib.Path(__file__).parent / "files/boot/cmdline").read_text())
+    here = pathlib.Path(__file__).parent
+    data = runpy.run_path(str(here / "data.py"))
+    # As deploy.py builds them.
+    tokens = owned((here / "files/boot/cmdline").read_text()) + data["system_inputs"](next(iter(data["MACHINES"])))["vt"]
     keys = {key(t) for t in tokens}
-    # Shaped like xeome-desktop's: a value holding "=" and "/", a trailing
-    # space, and keys the file owns already present with other values.
+    # Shaped like a real one's: a value holding "=" and "/", a trailing space,
+    # and keys the deploy owns already present with other values.
+    stale = "vt.default_red=6,255 vt.default_grn=7,134 vt.default_blu=9,120"
     current = ("nvme_load=YES nowatchdog rw rootflags=subvol=/@ root=UUID=5a4c2dc5-0000 "
-               "resume=UUID=30d1ef18-0000 quiet loglevel=7 zswap.enabled=1 "
-               "vt.default_red=6,255 vt.default_grn=7,134 vt.default_blu=9,120 ")
+               f"resume=UUID=30d1ef18-0000 quiet loglevel=7 zswap.enabled=1 {stale} ")
     merged = merge(current, tokens)
     kept = [t for t in current.split() if key(t) not in keys]
     assert merged.split()[: len(kept)] == kept, f"foreign tokens changed: {merged!r}"
+    assert not set(stale.split()) & set(merged.split()), f"the console's old colours stayed: {merged!r}"
     for t in tokens:
         same = [m for m in merged.split() if key(m) == key(t)]
         assert same == [t], f"{key(t)}: {same}, want [{t!r}]"
