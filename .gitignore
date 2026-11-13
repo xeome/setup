@@ -1,4 +1,3 @@
 # Written into the cwd when a pyinfra run fails.
 infra/pyinfra-debug.log
-# Written when deploy.py imports cmdline.py, and when dots.test.py imports dots.py.
 __pycache__/
