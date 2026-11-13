@@ -31,6 +31,9 @@ before applying over one:
 A dry run changes nothing in `~` or `/etc`. It still asks the one-time
 questions and keeps the answers.
 
+In the repo, `just dry`, `just apply` and `just update` run the same commands,
+even before the first apply has installed `dots`. `just test` runs every test.
+
 An apply that changes nothing takes about half a second and asks for no
 password: packages and `/etc` run again only when a file they read changed.
 To run them regardless, delete `~/.local/state/dots/system.sha256`, then run

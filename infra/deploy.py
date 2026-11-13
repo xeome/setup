@@ -44,7 +44,7 @@ PACKAGES = {
                 "adw-gtk-theme", "age", "autotiling-rs", "bc", "bitwarden", "brightnessctl",
                 "btop", "evince", "fd", "fzf", "ghostty", "git-delta",
                 "gnome-keyring", "grc", "gsettings-desktop-schemas", "gtk-update-icon-cache",
-                "htop", "hyprlock", "inter-font", "jq", "kdeconnect", "kvantum", "kvantum-qt5",
+                "htop", "hyprlock", "inter-font", "jq", "just", "kdeconnect", "kvantum", "kvantum-qt5",
                 "libnotify", "mate-polkit", "most", "neovim", "network-manager-applet",
                 "pamixer", "pavucontrol", "playerctl", "python-gobject", "python-numpy",
                 "python-pillow", "qt5ct", "qt6ct", "quickshell", "rbw", "seahorse", "starship",
