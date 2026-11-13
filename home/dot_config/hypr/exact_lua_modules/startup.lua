@@ -1,8 +1,10 @@
 hl.on("hyprland.start", function()
   -- Hand the session env to user services and portals.
   hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE SDL_VIDEODRIVER QT_QPA_PLATFORM QT_QPA_PLATFORMTHEME QT_STYLE_OVERRIDE QT_AUTO_SCREEN_SCALE_FACTOR QT_WAYLAND_DISABLE_WINDOWDECORATION SSH_AUTH_SOCK GNOME_KEYRING_CONTROL HYPRCURSOR_THEME HYPRCURSOR_SIZE XCURSOR_THEME XCURSOR_SIZE OBSIDIAN_USE_WAYLAND")
+  -- Starts rbw-agent, locked, so its ssh socket exists from login.
+  hl.exec_cmd("rbw lock")
 
-  hl.exec_cmd([[/usr/bin/swayidle timeout 1800 "pidof hyprlock || hyprlock" timeout 2100 "hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'" resume "hyprctl dispatch 'hl.dsp.dpms({ action = \"on\" })'"]])
+  hl.exec_cmd([[/usr/bin/swayidle timeout 1800 "pidof hyprlock || hyprlock" timeout 2100 "hyprctl dispatch 'hl.dsp.dpms({ action = \"off\" })'" resume "hyprctl dispatch 'hl.dsp.dpms({ action = \"on\" })'" before-sleep "rbw lock"]])
 
   hl.exec_cmd("/usr/lib/mate-polkit/polkit-mate-authentication-agent-1")
   hl.exec_cmd("/usr/bin/kdeconnectd")

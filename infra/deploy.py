@@ -49,7 +49,7 @@ PACKAGES = {
                 "htop", "hyprlock", "inter-font", "jq", "kdeconnect", "kvantum", "kvantum-qt5",
                 "libnotify", "mate-polkit", "most", "neovim", "network-manager-applet",
                 "pamixer", "pavucontrol", "playerctl", "python-gobject", "python-numpy",
-                "python-pillow", "qt5ct", "qt6ct", "quickshell", "seahorse", "starship",
+                "python-pillow", "qt5ct", "qt6ct", "quickshell", "rbw", "seahorse", "starship",
                 "swayidle", "thunar", "ttf-jetbrains-mono-nerd", "vim", "wl-clipboard",
                 "xorg-xprop", "xorg-xwayland", "yazi", "yt-dlp", "zathura", "zellij", "zoxide",
                 "zsh", "zsh-completions",
@@ -107,6 +107,7 @@ def put(src, dest, mode="644"):
 
 repo = family["repo"]
 repo["op"](name="Packages", packages=repo["common"] + repo[wm])
+repo["op"](name="Retired: bitwarden-cli, replaced by rbw", packages=["bitwarden-cli"], present=False)
 
 
 # No: the models go, the packages stay (see PACKAGES on removed names).
