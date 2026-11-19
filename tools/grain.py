@@ -12,7 +12,7 @@ Needs rsvg-convert, numpy, scipy and pillow. Run it by hand after changing
 `ground`, `panel` or `raised` in infra/data.py, then apply
 (the Qt theme rebuilds itself):
 
-    ~/.local/share/chezmoi/tools/grain.py
+    ~/.local/share/dots/tools/grain.py
 """
 import io
 import pathlib

@@ -1,4 +1,4 @@
-# From infra/deploy.py — edit: ~/.local/share/chezmoi/infra/files/boot/
+# From infra/deploy.py — edit: ~/.local/share/dots/infra/files/boot/
 # Tokens deploy.py owns in /etc/kernel/cmdline, merged by key by infra/cmdline.py.
 
 quiet splash loglevel=3 rd.udev.log_level=3

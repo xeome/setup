@@ -1,4 +1,4 @@
-# From infra/deploy.py — edit: ~/.local/share/chezmoi/infra/files/exit/
+# From infra/deploy.py — edit: ~/.local/share/dots/infra/files/exit/
 #
 # Table 100 holds only the ws-exit tunnel's default route, because deploy.py
 # configures ws-exit that way. Exit clients' DNS doesn't go through it:

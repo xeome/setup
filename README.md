@@ -99,12 +99,12 @@ After adding a machine, run `tools/plymouth.py` to draw its wordmark.
 # Installation
 
 Needs `git`, `uv`, `yay` and `base-devel`, and the machine's hostname in
-`MACHINES` (`infra/data.py`). The repo lives at `~/.local/share/chezmoi`: the
+`MACHINES` (`infra/data.py`). The repo lives at `~/.local/share/dots`: the
 `/etc` files and a few scripts name that path.
 
 ```bash
-git clone https://github.com/xeome/setup ~/.local/share/chezmoi
-cd ~/.local/share/chezmoi/infra
+git clone https://github.com/xeome/setup ~/.local/share/dots
+cd ~/.local/share/dots/infra
 uvx pyinfra@3.10.0 -y @local apply.py
 ```
 

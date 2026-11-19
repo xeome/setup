@@ -3,7 +3,7 @@ Applies this repo to the machine it runs on: ~ from home/ (home.py), and
 packages and /etc from deploy.py when what that half reads has changed.
 ~/.local/bin/dots runs it:
 
-    cd ~/.local/share/chezmoi/infra && uvx pyinfra@3.10.0 -y @local apply.py
+    cd ~/.local/share/dots/infra && uvx pyinfra@3.10.0 -y @local apply.py
 
 Steps with a stamp under ~/.local/state/dots run again only when their inputs
 changed (home.gates()), so an apply that changes nothing asks for no password

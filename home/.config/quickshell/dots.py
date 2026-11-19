@@ -11,7 +11,7 @@ above it and must lift off the screen.
     ~/.config/quickshell/dots.py [--out DIR] IMAGE...
 
 writes IMAGE's name + "-dots.png" beside each, or into DIR. Run it on the
-repo's copy (~/.local/share/chezmoi/home/.config/wallpapers/) to keep the result. Walls.qml
+repo's copy (~/.local/share/dots/home/.config/wallpapers/) to keep the result. Walls.qml
 runs it with --out ~/.local/share/xeome-dots.
 
 One size for every monitor, 3840x2160 (256 x 144 cells): the 4K draws it 1:1,
@@ -95,7 +95,7 @@ def dots(im, hi):
 def text_grey():
     """The brightest a dot gets."""
     # By path: this file runs from ~/.config/quickshell, the palette stays in the repo.
-    palette = runpy.run_path(str(pathlib.Path.home() / ".local/share/chezmoi/infra/data.py"))["PALETTE"]
+    palette = runpy.run_path(str(pathlib.Path.home() / ".local/share/dots/infra/data.py"))["PALETTE"]
     return np.array(list(bytes.fromhex(palette["dark"]["text"][1:])))
 
 

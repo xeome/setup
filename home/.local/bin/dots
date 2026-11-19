@@ -1,11 +1,11 @@
 #!/bin/bash
-# Applies ~/.local/share/chezmoi to this machine: ~ from home/, and packages
+# Applies ~/.local/share/dots to this machine: ~ from home/, and packages
 # and /etc from infra/ when their inputs changed (infra/apply.py).
 #
 # The last command is an exec, because an apply
 # overwrites this file while it runs, and bash reads a script as it goes.
 set -euo pipefail
-repo=~/.local/share/chezmoi
+repo=~/.local/share/dots
 if [[ ${1:-} == update ]]; then git -C "$repo" pull; shift; fi
 # -y skips the change detection that --dry and --diff print.
 yes=-y

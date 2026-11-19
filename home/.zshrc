@@ -20,6 +20,6 @@ eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"
 
 # The repo `dots` applies.
-alias cdots='cd ~/.local/share/chezmoi'
+alias cdots='cd ~/.local/share/dots'
 
 uptime

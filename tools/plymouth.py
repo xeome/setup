@@ -2,7 +2,7 @@
 """Draws the splash images into infra/files/plymouth/. Run it by hand after adding
 a machine to infra/data.py, and commit the PNGs:
 
-    python3 -I ~/.local/share/chezmoi/tools/plymouth.py
+    python3 -I ~/.local/share/dots/tools/plymouth.py
 
 lock/entry/bullet.png are 1x1 black: two-step will not start without them,
 and only a password prompt (no LUKS here) shows them.

@@ -1,5 +1,5 @@
 #!/bin/bash
-# From infra/deploy.py — edit: ~/.local/share/chezmoi/infra/files/dns/
+# From infra/deploy.py — edit: ~/.local/share/dots/infra/files/dns/
 #
 # Runs as root. Gives every wifi/ethernet link exactly one set of servers for
 # every lookup: pinned DoT if it can leave through that link, otherwise the

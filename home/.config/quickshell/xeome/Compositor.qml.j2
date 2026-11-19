@@ -11,7 +11,7 @@ import Quickshell
 // Templated, not detected at runtime: importing the wrong backend connects to
 // a missing socket and logs about it forever.
 //
-// Rendered from home/.config/quickshell/xeome/Compositor.qml.j2 in ~/.local/share/chezmoi.
+// Rendered from home/.config/quickshell/xeome/Compositor.qml.j2 in ~/.local/share/dots.
 Singleton {
 {%- if m.wm == "sway" %}
     readonly property string focusedMonitor: I3.focusedMonitor?.name ?? ""

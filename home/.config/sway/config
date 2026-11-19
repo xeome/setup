@@ -1,5 +1,5 @@
 # Sway entry point. Managed by dots: edit home/.config/sway/config in
-# ~/.local/share/chezmoi. Outputs and workspaces come from MACHINES in
+# ~/.local/share/dots. Outputs and workspaces come from MACHINES in
 # infra/data.py through conf.d/settings.conf.
 #
 # Needs swayfx: blur, corner_radius, shadows and layer_effects are its

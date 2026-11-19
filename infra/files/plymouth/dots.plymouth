@@ -1,4 +1,4 @@
-# From infra/deploy.py — edit: ~/.local/share/chezmoi/infra/files/plymouth/
+# From infra/deploy.py — edit: ~/.local/share/dots/infra/files/plymouth/
 # Images come from tools/plymouth.py.
 [Plymouth Theme]
 Name=dots
