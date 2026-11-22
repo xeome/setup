@@ -18,6 +18,7 @@ done
 
 eval "$(starship init zsh)"
 eval "$(zoxide init zsh)"
+command -v mise &>/dev/null && eval "$(mise activate zsh)"
 
 # The repo `dots` applies.
 alias cdots='cd ~/.local/share/dots'
