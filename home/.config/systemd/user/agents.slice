@@ -1,0 +1,9 @@
+# The skills' lanes and deslop run each command as
+#   systemd-run --user --scope --slice=agents.slice <command>
+# and refuse to run when this unit is missing, which reads as MemoryMax=infinity.
+# A runaway build dies instead of swapping the desktop out.
+# The name has no dash: a dash would nest it under another slice.
+
+[Slice]
+MemoryMax=50%
+MemorySwapMax=0
