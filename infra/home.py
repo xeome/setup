@@ -198,10 +198,13 @@ def plan(hostname, home, sources, tree=ROOT / "home"):
 def ops(actions):
     from pyinfra.operations import files
 
+    unit_dir = pathlib.Path.home() / ".config/systemd/user"
+    reload_units = False
     for kind, path, payload, mode in actions:
         if kind == "dir":
             files.directory(name=path, path=path, mode=f"{mode:o}")
-        elif kind == "remove" and os.path.islink(path):
+            continue
+        if kind == "remove" and os.path.islink(path):
             files.link(name=f"Remove {path}", path=path, present=False)
         elif kind == "remove" and os.path.isdir(path):
             files.directory(name=f"Remove {path}", path=path, present=False)
@@ -213,6 +216,9 @@ def ops(actions):
             # Explicit mode: the local connector copies from a 0600 temp file.
             files.put(name=path, src=io.BytesIO(payload) if isinstance(payload, bytes) else payload, dest=path,
                       mode=f"{mode:o}", create_remote_dir=False)
+        if unit_dir in pathlib.Path(path).parents:
+            reload_units = True
+    return reload_units
 
 
 def state(home):
