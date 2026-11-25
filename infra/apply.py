@@ -62,6 +62,9 @@ home.ops(home.plan(hostname, HOME, home.sources()))
 # ~/.cache the first time, so that run needs the network.
 home.gated("kvantum", gates["kvantum"], HOME,
            lambda: run("Build the Kvantum theme", "python3", "-I", ROOT / "tools/kvantum.py"))
+# After the home files, which make ~/.local/bin.
+home.gated("releases", gates["releases"], HOME,
+           lambda: run("Install pinned releases", "python3", "-I", ROOT / "infra/releases.py", "install"))
 home.gated("fonts", gates["fonts"], HOME,
            lambda: run("GTK fonts", "bash", ROOT / "infra/scripts/configure-fonts.sh",
                        home.data.MACHINES[hostname]["text_scale"]))

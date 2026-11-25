@@ -1,0 +1,15 @@
+[Unit]
+Description=CLIProxyAPI, the Codex proxy on 127.0.0.1:18768
+Documentation=https://github.com/router-for-me/CLIProxyAPI
+
+[Service]
+# infra/releases.toml pins the binary. -local-model uses the embedded model
+# catalog instead of fetching one from GitHub every 3 hours.
+ExecStart=%h/.local/bin/cli-proxy-api -config %h/.config/cli-proxy-api/config.yaml -local-model
+# ~/.local/state/cli-proxy-api, the auth-dir holding the Codex login's tokens.
+StateDirectory=cli-proxy-api
+StateDirectoryMode=0700
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

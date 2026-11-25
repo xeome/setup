@@ -234,6 +234,7 @@ def gates(hostname):
         "set-theme": [infra / "scripts/set-theme.sh"],
         "kvantum": [repr(data.PALETTE), ROOT / "tools/kvantum.py", ROOT / "home/.config/quickshell/xeome/grain-ground.png"],
         "fonts": [infra / "scripts/configure-fonts.sh", repr(data.MACHINES[hostname]["text_scale"])],
+        "releases": [infra / "releases.toml", infra / "releases.py"],
     }
 
 
