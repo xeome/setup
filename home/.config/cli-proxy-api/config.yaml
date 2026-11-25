@@ -22,7 +22,7 @@ access:
     - "unused"
 
 oauth:
-  auth-dir: "~/.local/state/cli-proxy-api"
+  auth-dir: "~/.local/state/cli-proxy-api-auth"
 
 observability:
   usage:

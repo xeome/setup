@@ -6,8 +6,9 @@ Documentation=https://github.com/router-for-me/CLIProxyAPI
 # infra/releases.toml pins the binary. -local-model uses the embedded model
 # catalog instead of fetching one from GitHub every 3 hours.
 ExecStart=%h/.local/bin/cli-proxy-api -config %h/.config/cli-proxy-api/config.yaml -local-model
-# ~/.local/state/cli-proxy-api, the auth-dir holding the Codex login's tokens.
-StateDirectory=cli-proxy-api
+# ~/.local/state/cli-proxy-api-auth, the auth-dir holding the Codex login's tokens.
+# Not cli-proxy-api: systemd would symlink that to the existing ~/.config/cli-proxy-api.
+StateDirectory=cli-proxy-api-auth
 StateDirectoryMode=0700
 Restart=on-failure
 
