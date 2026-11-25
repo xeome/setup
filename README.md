@@ -32,7 +32,12 @@ A dry run changes nothing in `~` or `/etc`. It still asks the one-time
 questions and keeps the answers.
 
 In the repo, `just dry`, `just apply` and `just update` run the same commands,
-even before the first apply has installed `dots`. `just test` runs every test.
+even before the first apply has installed `dots`.
+
+`just test` runs the default suite. Run `python3 -B infra/home.test.py` from
+the repo root for the separate home regression check. Its pinned pyinfra
+3.10.0 must already be in the uv cache. The check runs offline in a temporary
+home. It does not apply changes to the live system.
 
 An apply that changes nothing takes about half a second and asks for no
 password: packages and `/etc` run again only when a file they read changed.

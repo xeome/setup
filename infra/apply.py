@@ -56,7 +56,7 @@ home.gated("set-theme", gates["set-theme"], HOME,
 if not (HOME / ".oh-my-zsh").is_dir():
     run("Install oh-my-zsh", "bash", ROOT / "infra/scripts/install-ohmyzsh.sh")
 
-home.ops(home.plan(hostname, HOME, home.sources()))
+reload_units = home.ops(home.plan(hostname, HOME, home.sources()))
 
 # Generated rather than committed. It fetches its pinned KvLibadwaita into
 # ~/.cache the first time, so that run needs the network.
@@ -73,3 +73,9 @@ home.gated("fonts", gates["fonts"], HOME,
 run("qt5ct, qt6ct and Kvantum follow gsettings", ROOT / "home/.local/bin/qt-theme")
 run("Import the git signing key", "bash", ROOT / "infra/scripts/import-gpg-key.sh")
 run("Link Zen's profiles", "bash", ROOT / "infra/scripts/link-zen-chrome.sh")
+
+if reload_units:
+    server.shell(name="Reload user systemd units", commands=[
+        "systemctl --user daemon-reload || { "
+        "printf '%s\\n' 'Reload failed. Run manually: systemctl --user daemon-reload' >&2; exit 1; }"
+    ])
