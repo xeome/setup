@@ -1,0 +1,32 @@
+# CLIProxyAPI on loopback for Codex. Keys left out take the binary's
+# defaults (config.example.yaml in the release tarball).
+config-version: 8
+
+server:
+  # Fixed: an empty or non-canonical one is generated and written back here at startup.
+  server-id: "d6b3b20c-b173-4534-87aa-86e599c2095b"
+  host: "127.0.0.1"
+  port: 18768
+  discovery:
+    enabled: false
+
+management:
+  # Empty turns the management API off.
+  secret-key: ""
+  # Also stops the panel's background updater.
+  disable-control-panel: true
+
+access:
+  # The token claudex already sends.
+  api-keys:
+    - "unused"
+
+oauth:
+  auth-dir: "~/.local/state/cli-proxy-api"
+
+observability:
+  usage:
+    usage-statistics-enabled: false
+
+plugins:
+  enabled: false

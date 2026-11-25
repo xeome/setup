@@ -23,7 +23,7 @@ test:
     set -uo pipefail
     bad=0
     run() { out=$("$@" 2>&1 </dev/null) || { echo "FAIL ${*: -1}"; echo "$out"; bad=1; }; }
-    for t in tools/*.test.py infra/home.py infra/askonce.py infra/cmdline.py; do run python3 -I "$t"; done
+    for t in tools/*.test.py infra/home.py infra/releases.py infra/askonce.py infra/cmdline.py; do run python3 -I "$t"; done
     for t in tools/*.test.mjs; do run node "$t"; done
     ((bad)) || echo "all tests pass"
     exit $bad
