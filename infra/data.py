@@ -122,7 +122,6 @@ CONSOLE = ["#000000", "#b8585f", "#6e7a56", "#887353", "#607894", "#876e86", "#5
 #   lock_output the output hyprlock puts its input field, player and system info on.
 #   text_scale  multiplies GTK and quickshell text; terminals stay at 10pt.
 #   monitors    each output, and the workspaces it holds.
-#   exit_node   the Tailscale exit node whose clients leave through Windscribe.
 MACHINES = {
     "xeome-desktop": {
         "wm": "hyprland",
@@ -136,7 +135,6 @@ MACHINES = {
             {"output": "DP-3", "mode": "1920x1080@144", "position": "2560x360", "scale": 1,
              "workspaces": [2, 3, 5, 6, 7, 8, 9]},
         ],
-        "exit_node": True,
     },
     "emin-ultrabook": {
         "wm": "hyprland",
@@ -188,4 +186,4 @@ def system_inputs(hostname):
     m = MACHINES[hostname]
     vt = [f"vt.default_{name}=" + ",".join(str(channels(c)[i]) for c in CONSOLE)
           for i, name in enumerate(("red", "grn", "blu"))]
-    return {"hostname": hostname, "wm": m["wm"], "exit_node": m.get("exit_node", False), "vt": vt}
+    return {"hostname": hostname, "wm": m["wm"], "vt": vt}
